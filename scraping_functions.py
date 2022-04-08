@@ -57,7 +57,7 @@ def get_titles_info(article_list):
     
 #%%
 
-def get_content(title_list):
+def get_content(title_list): # MODIFY THIS FUNCTION OR 'get_articles' TO CHECK FOR NUMBER OF SENTENCES PER ARTICLE
 
     '''
     This function gets the content from all of the article titles in the total_titles list
