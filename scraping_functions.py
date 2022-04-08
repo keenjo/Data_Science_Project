@@ -3,7 +3,7 @@ import wikipedia
 
 #%%
 
-def get_articles(cat_list, num_results):
+def get_articles(cat_list, num_results): # CHANGE THIS FUNCTION SO WE DON'T GET SO MANY 'LIST ARTICLES'
     
     '''
     This function takes a list of categories and gets a specified number
