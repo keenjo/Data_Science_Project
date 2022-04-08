@@ -67,7 +67,7 @@ def get_content(title_list):
     content_total = [] # content of the pages
 
     for cat in title_list: # For every category in title_list
-        cat_cont_list = [] # List of all of the content for a specific category
+        cat_cont_list = [] # List of all of the content for a specific category (i.e. category content list)
         for title in cat: # For every title in a specific category
             try:
                 page = wikipedia.page(title)
@@ -95,13 +95,11 @@ def get_triples(page_name):
     
     for x in page.data['wikidata']:
         one_triple = []
-        #print(type(page.data['wikidata'][x]))
         if type(page.data['wikidata'][x]) is str:
             one_triple.append(x)
             one_triple.append(page.data["wikidata"][x])
             triples_list.append(one_triple)
             one_triple = []
-            #print(f'{x}; {page.data["wikidata"][x]}\n')
         if type(page.data['wikidata'][x]) is list:
             for item in page.data['wikidata'][x]:
                 if type(item) is str:
@@ -109,7 +107,6 @@ def get_triples(page_name):
                     one_triple.append(item)
                     triples_list.append(one_triple)
                     one_triple = []
-                    #print(f'{x}; {item}\n')
                 elif type(item) is dict:
                     for key in item:
                         one_triple.append(x)
@@ -117,7 +114,6 @@ def get_triples(page_name):
                         one_triple.append(item[key])
                         triples_list.append(one_triple)
                         one_triple = []
-                        #print(f'{x}, {key}, {item[key]}\n')
         if type(page.data['wikidata'][x]) is dict:
             for item in page.data['wikidata'][x]:
                 one_triple.append(x)
@@ -125,7 +121,6 @@ def get_triples(page_name):
                 one_triple.append(page.data["wikidata"][x][item])
                 triples_list.append(one_triple)
                 one_triple = []
-                #print(f'{x}; {item}; {page.data["wikidata"][x][item]}\n')
                 
     return triples_list
 
@@ -137,7 +132,7 @@ def combine_triples(titles_total):
     
     for cat in titles_total: # For each category (inner list) within titles_total
         cat_triples = [] # All of the triples for one category
-        for art in cat:
+        for art in cat: # For every article in a specific category
             triples_list = get_triples(art)
             cat_triples.append(triples_list)
             
