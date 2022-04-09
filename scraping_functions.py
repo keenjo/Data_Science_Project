@@ -90,6 +90,8 @@ def get_content(titles_total, infoboxes_total):
     This function gets the content from all of the article titles in the total_titles list
     - title_list: list of all of the article titles retreived
     - infobox_list: list of all of the infoboxes retreived
+    
+    **I used the wikipedia package rather than wptools here because the wikipedia package seemed to get way more text than wptools**
     '''    
 
     content_total = [] # content of the pages
