@@ -5,6 +5,9 @@ import pandas as pd
 #%%
 
 def get_articles(cat_list, num_results):
+    # Add parameter to check number of sentences perarticle (either here or in 'get_content' function)
+    # See if we can fix this function to skip 'list' and 'disambiguation' wikipedia pages
+    # Tried creating this function with RDF/SPARQL but had trouble looping through queries for each category
     
     '''
     This function takes a list of categories and gets a specified number
@@ -42,7 +45,7 @@ def get_titles_info(article_list):
             page.get_parse()
             page_name = page.data['title']
             cat_titles.append(page_name)
-            titles_total.append(cat_titles)
+            print(f'{art} title retrieved')
             
             if page.data['infobox']:
                 page_infobox = page.data['infobox']
@@ -50,6 +53,8 @@ def get_titles_info(article_list):
             else:
                 cat_boxes.append(None)
                 
+            print(f'{art} infobox retrieved')
+            
         titles_total.append(cat_titles)
         infoboxes_total.append(cat_boxes)
         
@@ -71,15 +76,12 @@ def get_content(title_list, infobox_list):
     for cat in title_list: # For every category in title_list
         cat_cont_list = [] # List of all of the content for a specific category
         for title in cat: # For every title in a specific category
-            try:
-                page = wikipedia.page(title)
-                cat_cont_list.append(page.content)
-            except wikipedia.exceptions.DisambiguationError: # Need better solution for this exception
-                title_list.remove(title)
-                infobox_list.remove(title)
-            except wikipedia.exceptions.PageError: # Need better solution for this exception
-                title_list.remove(title)
-                infobox_list.remove(title)
+            page = wptools.page(title)
+            page.get_query()
+            page_content = page.data['extext']
+            cat_cont_list.append(page_content)
+            print(f'{title} content retrieved')
+            
         content_total.append(cat_cont_list)
         
     return content_total
@@ -146,6 +148,7 @@ def combine_triples(titles_total):
         for art in cat:
             triples_list = get_triples(art)
             cat_triples.append(triples_list)
+            print(f'{art} triples retrieved')
             
         triples_total.append(cat_triples)
         
@@ -179,6 +182,8 @@ def combine_data(categories, titles, infoboxes, content, triples):
             
             data_total.append(single_data) # Append all data from one article to data_total list
             
-    df = pd.DataFrame(data_total, columns = ['Cateogry', 'Title', 'Infobox', 'Content', 'Triples'])
-        
+    df = pd.DataFrame(data_total, columns = ['Category', 'Title', 'Infobox', 'Content', 'Triples'])
+    print('Data successfully combined.')
+    
     return data_total, df
+
