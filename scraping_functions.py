@@ -103,8 +103,8 @@ def get_content(titles_total, infoboxes_total):
 
     '''
     This function gets the content from all of the article titles in the total_titles list
-    - title_list: list of all of the article titles retreived
-    - infobox_list: list of all of the infoboxes retreived
+    - titles_total: list of all of the article titles retreived
+    - infoboxes_total: list of all of the infoboxes retreived
     
     **I used the wikipedia package rather than wptools here because the wikipedia package seems to get way more text than wptools**
     '''    
@@ -167,13 +167,11 @@ def get_triples(page_name):
         page.get_wikidata()
         
         for x in page.data['wikidata']: # For each triple in the list of wikidata triples
-            #print(type(page.data['wikidata'][x]))
             if type(page.data['wikidata'][x]) is str:
                 one_triple = [] # lists for one triple, to be added to the full list of triples 'triples_list'
                 one_triple.append(x)
                 one_triple.append(page.data["wikidata"][x])
                 triples_list.append(one_triple)
-                #print(f'{x}; {page.data["wikidata"][x]}\n')
             if type(page.data['wikidata'][x]) is list:
                 for item in page.data['wikidata'][x]:
                     if type(item) is str:
@@ -181,7 +179,6 @@ def get_triples(page_name):
                         one_triple.append(x)
                         one_triple.append(item)
                         triples_list.append(one_triple)
-                        #print(f'{x}; {item}\n')
                     elif type(item) is dict:
                         for key in item:
                             one_triple = []
@@ -189,15 +186,21 @@ def get_triples(page_name):
                             one_triple.append(key)
                             one_triple.append(item[key])
                             triples_list.append(one_triple)
-                            #print(f'{x}, {key}, {item[key]}\n')
-            if type(page.data['wikidata'][x]) is dict:
+            elif type(page.data['wikidata'][x]) is dict:
                 for key in page.data['wikidata'][x]:
-                    one_triple = []
-                    one_triple.append(x)
-                    one_triple.append(key)
-                    one_triple.append(page.data["wikidata"][x][key])
-                    triples_list.append(one_triple)
-                    #print(f'{x}; {item}; {page.data["wikidata"][x][item]}\n')
+                    value = page.data["wikidata"][x][key]
+                    if type(value) is str:
+                        one_triple = []
+                        one_triple.append(x)
+                        one_triple.append(key)
+                        one_triple.append(value)
+                        triples_list.append(one_triple)
+                    elif type(value) is list:
+                        for index in value:
+                            one_triple = []
+                            one_triple.append(x)
+                            one_triple.append(key)
+                            one_triple.append(index)
                     
     except LookupError:
         pass
@@ -289,7 +292,7 @@ print(null_data)
 index = np.random.randint(0,len(df['Category']))
 print(f'Category: {df["Category"][index]}\n')
 print(f'Title: {df["Title"][index]}\n')
-print(f' Infobox: {df["Infobox"][index]}\n')
+print(f'Infobox: {df["Infobox"][index]}\n')
 print(f'Content: {df["Content"][index]}\n')
 print(f'Triples: {df["Triples"][index]}\n')
 
