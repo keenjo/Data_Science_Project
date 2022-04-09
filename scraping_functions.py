@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import re
 from tqdm import tqdm
+import spacy
 
 #%%
 #I've changed the names of some of these categories from plural to singular because the API gives much better results
@@ -16,28 +17,42 @@ categories = ['Airport', 'Artist', 'Astronaut', 'Building', 'Astronomical Object
 
 #%%
 
-def get_articles(cat_list, num_results):
+def get_articles(cat_list, num_results): #min_sents):
     # **Add parameter to check number of sentences per article (either here or in 'get_content' function)
     # Tried creating this function with RDF/SPARQL but had trouble looping through queries for each category
     
     '''
     This function takes a list of categories and gets a specified number
-    of wikipedia articles relating to that category:
+    of wikipedia articles relating to each category:
         - cat_list: list of categories
         - num_results: number of articles to get for each category
     '''
     
+    #nlp = spacy.load('en_core_web_sm') <- part of testing number of sentences
     
     articles_total = [] # List containing a list of articles for each category
     
-    for cat in tqdm(cat_list, desc='Retrieving articles'):
+    for cat in tqdm(cat_list, desc='Retrieving articles'): # For each category in the 'categories' list
         new_articles = wikipedia.search(f'{cat}', results=num_results)
-        for article in new_articles:
-            if re.search('list', article.lower()):
+        for article in new_articles: # For every article that was retrieved for a specific category
+            '''
+            * Idea I was testing to check number of sentences (not currently working)
+            
+            page = wptools.page(article)
+            page.get_query()
+            text = page.data['extext']
+            sp_text = nlp(text)
+            
+            sents = []
+    
+            for sentence in sp_text.sents:
+                    sents.append(sentence)
+            if len(sents) < min_sents:
                 new_articles.remove(article)
-            elif re.search('lists', article.lower()):
+            '''
+            if re.search('lists?', article.lower()): # Get rid of article if 'list' or 'lists' is in the title
                 new_articles.remove(article)
-            elif re.search('disambiguation', article.lower()):
+            elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation is in the title'
                 new_articles.remove(article)
                 
         articles_total.append(new_articles)
@@ -91,7 +106,7 @@ def get_content(titles_total, infoboxes_total):
     - title_list: list of all of the article titles retreived
     - infobox_list: list of all of the infoboxes retreived
     
-    **I used the wikipedia package rather than wptools here because the wikipedia package seemed to get way more text than wptools**
+    **I used the wikipedia package rather than wptools here because the wikipedia package seems to get way more text than wptools**
     '''    
 
     content_total = [] # content of the pages
@@ -102,46 +117,34 @@ def get_content(titles_total, infoboxes_total):
             try:
                 page = wikipedia.page(title)
                 cat_cont_list.append(page.content)
-                print(f'{title} content retrieved')
+                print(f'{title} content retrieved')  
+                
+                ''' 
+                For the exceptions below, I just try to retrieve content using wptools rather than wikipedia
+                - Even though wptools retrieves less content than the wikipedia package, I figure it is better than
+                  putting a null value for the content of an article
+                '''
             except wikipedia.exceptions.PageError:
-                # ***Don't love this solution but don't know if there is an alternative to solve PageError***
-                cat_cont_list.append(None)
-                print(f'{title} content not found')
+                try:
+                    page = wptools.page(title)
+                    page.get_query()
+                    page_content = page.data['extext']
+                    cat_cont_list.append(page_content)
+                    print(f'{title} content retrieved')
+                except ValueError:
+                    cat_cont_list.append(None)
+                    print(f'{title} content not found')
             except wikipedia.exceptions.DisambiguationError: #as many:
-                cat_cont_list.append(None)
-                print(f'{title} content not found')
-                # Had a double disambiguation error which broke the code below, working on solution
-                
-                '''
-                This bit will choose a random value from the disambiguation options then do the following:
-                    - update the information in the title and infoboxes lists
-                    - retrieve the content for this new article
-                    
-                NOTE TO SELF: Make this bit more efficient by simplifying functions and making this bit recursive
-                - instead of having all of these functions only work on a list of articles,
-                  make them work on one article then just create another function which loops through this simpler funtion
-                
-                updated_item = many.options[np.random.randint(0, len(many.options))]
-                
-                page = wptools.page(updated_item)
-                page.get_parse()
-                page_name = page.data['title']
-                titles_total[cat_index][title_index] = page_name 
-                print(f'UPDATE: {title} title retrieved')
-            
-                if page.data['infobox']:
-                    page_infobox = page.data['infobox']
-                    infoboxes_total[cat_index][title_index] = page_infobox
-                    print(f'UPDATE: {title} infobox retrieved')
-                else:
-                    infoboxes_total[cat_index][title_index] = None
-                    print(f'UPDATE: {title} does not have an infobox')
-                
-                page = wikipedia.page(updated_item)
-                cat_cont_list.append(page.content)
-                
-                print(f'{title} content retrieved')
-                '''
+                try:
+                    page = wptools.page(title)
+                    page.get_query()
+                    page_content = page.data['extext']
+                    cat_cont_list.append(page_content)
+                    print(f'{title} content retrieved')
+                except ValueError:
+                    cat_cont_list.append(None)
+                    print(f'{title} content not found')
+               
         content_total.append(cat_cont_list)
         
     return content_total
@@ -163,38 +166,37 @@ def get_triples(page_name):
     try:
         page.get_wikidata()
         
-        for x in page.data['wikidata']:
-            one_triple = []
+        for x in page.data['wikidata']: # For each triple in the list of wikidata triples
             #print(type(page.data['wikidata'][x]))
             if type(page.data['wikidata'][x]) is str:
+                one_triple = [] # lists for one triple, to be added to the full list of triples 'triples_list'
                 one_triple.append(x)
                 one_triple.append(page.data["wikidata"][x])
                 triples_list.append(one_triple)
-                one_triple = []
                 #print(f'{x}; {page.data["wikidata"][x]}\n')
             if type(page.data['wikidata'][x]) is list:
                 for item in page.data['wikidata'][x]:
                     if type(item) is str:
+                        one_triple = []
                         one_triple.append(x)
                         one_triple.append(item)
                         triples_list.append(one_triple)
-                        one_triple = []
                         #print(f'{x}; {item}\n')
                     elif type(item) is dict:
                         for key in item:
+                            one_triple = []
                             one_triple.append(x)
                             one_triple.append(key)
                             one_triple.append(item[key])
                             triples_list.append(one_triple)
-                            one_triple = []
                             #print(f'{x}, {key}, {item[key]}\n')
             if type(page.data['wikidata'][x]) is dict:
-                for item in page.data['wikidata'][x]:
-                    one_triple.append(x)
-                    one_triple.append(item)
-                    one_triple.append(page.data["wikidata"][x][item])
-                    triples_list.append(one_triple)
+                for key in page.data['wikidata'][x]:
                     one_triple = []
+                    one_triple.append(x)
+                    one_triple.append(key)
+                    one_triple.append(page.data["wikidata"][x][key])
+                    triples_list.append(one_triple)
                     #print(f'{x}; {item}; {page.data["wikidata"][x][item]}\n')
                     
     except LookupError:
@@ -212,7 +214,7 @@ def combine_triples(titles_total):
     for cat in titles_total: # For each category (inner list) within titles_total
         cat_triples = [] # All of the triples for one category
         counter += 1
-        for art in tqdm(cat, desc=f'Retrieving triples ({counter}/{len(titles_total)})'):
+        for art in tqdm(cat, desc=f'Retrieving triples ({counter}/{len(titles_total)})'): # For each article in a specific category
             triples_list = get_triples(art)
             if not triples_list:
                 cat_triples.append(None)
@@ -270,7 +272,7 @@ def combine_data(categories, titles, infoboxes, content, triples):
 #%%
 # Testing
 
-articles_total = get_articles(categories, num_results=25)
+articles_total = get_articles(categories, num_results=50)
 titles_total, infoboxes_total = get_titles_info(articles_total)
 content_total = get_content(titles_total, infoboxes_total)
 triples_total = combine_triples(titles_total)
@@ -278,9 +280,18 @@ data_total, group_data, null_data, df = combine_data(categories, titles_total, i
 
 #%%
 
-print(df.head())
+print(df.info())
 print(group_data)
 print(null_data)
-    
+
+#%%
+
+index = np.random.randint(0,len(df['Category']))
+print(f'Category: {df["Category"][index]}\n')
+print(f'Title: {df["Title"][index]}\n')
+print(f' Infobox: {df["Infobox"][index]}\n')
+print(f'Content: {df["Content"][index]}\n')
+print(f'Triples: {df["Triples"][index]}\n')
+
 
 
