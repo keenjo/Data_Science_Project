@@ -18,8 +18,9 @@ categories = ['Airport', 'Artist', 'Astronaut', 'Building', 'Astronomical Object
 #%%
 
 def get_articles(cat_list, num_results): #min_sents):
-    # **Add parameter to check number of sentences per article (either here or in 'get_content' function)
-    # Tried creating this function with RDF/SPARQL but had trouble looping through queries for each category
+    # **Add parameter to check number of sentences per article (either here or in 'get_content' function)**
+    # Tried creating this function with RDF/SPARQL but had trouble looping through queries for each category,
+    # but this method seems to be working well, so it should be fine
     
     '''
     This function takes a list of categories and gets a specified number
@@ -52,7 +53,7 @@ def get_articles(cat_list, num_results): #min_sents):
             '''
             if re.search('lists?', article.lower()): # Get rid of article if 'list' or 'lists' is in the title
                 new_articles.remove(article)
-            elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation is in the title'
+            elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation' is in the title
                 new_articles.remove(article)
                 
         articles_total.append(new_articles)
@@ -122,7 +123,8 @@ def get_content(titles_total, infoboxes_total):
                 ''' 
                 For the exceptions below, I just try to retrieve content using wptools rather than wikipedia
                 - Even though wptools retrieves less content than the wikipedia package, I figure it is better than
-                  putting a null value for the content of an article
+                  putting a null value for the content of an article; null values are only entered if neither wikipedia
+                  nor wptools can find the content
                 '''
             except wikipedia.exceptions.PageError:
                 try:
@@ -249,7 +251,8 @@ def combine_data(categories, titles, infoboxes, content, triples):
     for cat_num, cat in enumerate(categories): # For every category in categories list
         for index in range(len(titles[cat_num])): # For each item in each specific category
             single_data = [] # List containing data from one article
-            
+
+            single_data.append(cat_num) # Keeping category number will make it easier to evaluate clustering
             single_data.append(cat)
             single_data.append(titles[cat_num][index])
             single_data.append(infoboxes[cat_num][index])
@@ -258,15 +261,15 @@ def combine_data(categories, titles, infoboxes, content, triples):
             
             data_total.append(single_data) # Append all data from one article to data_total list
             
-    df = pd.DataFrame(data_total, columns = ['Category', 'Title', 'Infobox', 'Content', 'Triples'])
+    df = pd.DataFrame(data_total, columns = ['Category_num', 'Category', 'Title', 'Infobox', 'Content', 'Triples']) # Pandas dataframe containing all of the collected data
     
-    null_data = {}
+    null_data = {} # The number of null values for each column
     null_data['Title'] = f'{df["Title"].isnull().sum()} null title items'
     null_data['Infobox'] = f'{df["Infobox"].isnull().sum()} null infobox items'
     null_data['Content'] = f'{df["Content"].isnull().sum()} null content items'
     null_data['Triples'] = f'{df["Triples"].isnull().sum()} null triples items'
     
-    group_data = df.groupby(['Category']).count()
+    group_data = df.groupby(['Category']).count() # The number of datapoints for each category
     
     print('Data successfully combined.')
     
