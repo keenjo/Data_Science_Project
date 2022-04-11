@@ -3,17 +3,72 @@ import wikipedia
 import pandas as pd
 import numpy as np
 import re
-from tqdm import tqdm
 import spacy
 
-#%%
-#I've changed the names of some of these categories from plural to singular because the API gives much better results
-# For instance, with 'Airports' I get a lot of list articles but with 'Airport' I get articles about actual airports
+from SPARQLWrapper import SPARQLWrapper, JSON
+from tqdm import tqdm
 
-categories = ['Airport', 'Artist', 'Astronaut', 'Building', 'Astronomical Object',
-              'City', 'Comicbook Character', 'Company', 'Food', 'Transport', 'Monument',
-              'Politician', 'Team', 'Athlete', 'University', 'Written Communication']
+# Categories for which we want to retrieve elements that are instances of that category
+general_categories = {
+    "Airports"                 : "wd:Q1248784",
+    "Buildings"                : "wd:Q41176",
+    "Astronomical objects"     : "wd:Q6999",
+    "Cities"                   : "wd:Q7930989",
+    "Comics characters"        : "wd:Q1114461",
+    "Companies"                : "wd:Q783794",
+    "Foods"                    : "wd:Q2095",
+    "Transport"                : "wd:Q334166",
+    "Sports teams"             : "wd:Q12973014",
+    "Written communication"    : "wd:Q1149626"
+}
 
+# Categories for which we want to retrieve elements that have that category as their occupation
+occupation_categories = {
+    "Artists"                  : "wd:Q483501",
+    "Astronauts"               : "wd:Q11631",
+    "Politicians"              : "wd:Q82955",
+    "Sportspeople"             : "wd:Q50995749",
+}
+
+# Categories that contain several subcategories, and for which we want to retrieve elements that are instances of any of those subcategories
+multi_categories = [
+    "Monuments and memorials",
+    "Universities and colleges"
+]
+
+categories = sorted(list(general_categories.keys()) + list(occupation_categories.keys()) + multi_categories)
+
+def get_sparql_request(category):
+    '''
+    Generates a SPARQL that returns a list of titles of Wikipedia articles about items of the given category.
+        - category: the name of the category
+    '''
+    
+    # Add SPARQL prefixes and select all Wikidata items
+    query = "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"
+    query += "SELECT ?articlename WHERE {{"
+    
+    
+    if category in occupation_categories.keys():
+        # Wikidata elements that have an occupation that is either the category, or of an element that is a subclass of the category
+        wikidata_item = occupation_categories[category]
+        query += "{{ ?wditem wdt:P106 " + wikidata_item + "}} UNION {{ ?wditem wdt:P106 ?y . ?y wdt:P279* " + wikidata_item + ". }}"
+        
+    elif category in multi_categories:
+        # Wikimedia elements that are an instance of an element that is a subclass of an element that belongs to the Wikimedia Commons category
+        query += "?wditem wdt:P31 ?y . ?y wdt:P279* ?z. ?z wdt:P373 \"" + category + "\" ."
+        
+    elif category in general_categories.keys():
+        # Wikidata elements that are either an instance of the category, or of an element that is a subclass of the category
+        wikidata_item = general_categories[category]
+        query += "{{ ?wditem wdt:P31 " + wikidata_item + "}} UNION {{ ?wditem wdt:P31 ?y . ?y wdt:P279* " + wikidata_item + ". }}"
+        
+    else:
+        raise ValueError("The selected category is of unknown type. Please add it to the correct dictionary.")
+    
+    # Ensure that the Wikidata page has a corresponding Wikipedia article
+    query += " ?link schema:about ?wditem ; schema:isPartOf <https://en.wikipedia.org/> ; schema:name ?articlename . }} LIMIT {0}"
+    return query
 
 #%%
 
@@ -29,13 +84,23 @@ def get_articles(cat_list, num_results): #min_sents):
         - num_results: number of articles to get for each category
     '''
     
+    sparql = SPARQLWrapper('https://query.wikidata.org/sparql')
+    sparql.setReturnFormat(JSON)
+    
     #nlp = spacy.load('en_core_web_sm') <- part of testing number of sentences
     
     articles_total = [] # List containing a list of articles for each category
     
     for cat in tqdm(cat_list, desc='Retrieving articles'): # For each category in the 'categories' list
-        new_articles = wikipedia.search(f'{cat}', results=num_results)
-        for article in new_articles: # For every article that was retrieved for a specific category
+        sparql_request = get_sparql_request(cat).format(num_results)
+        sparql.setQuery(sparql_request)
+        results = sparql.queryAndConvert()['results']['bindings']
+        
+        new_articles = []
+        for result in results: # For every article that was retrieved for a specific category
+            article = result['articlename']['value']
+            add_article = True
+        
             '''
             * Idea I was testing to check number of sentences (not currently working)
             
@@ -49,13 +114,16 @@ def get_articles(cat_list, num_results): #min_sents):
             for sentence in sp_text.sents:
                     sents.append(sentence)
             if len(sents) < min_sents:
-                new_articles.remove(article)
+                add_article = False
             '''
-            if re.search('lists?', article.lower()): # Get rid of article if 'list' or 'lists' is in the title
-                new_articles.remove(article)
-            elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation' is in the title
-                new_articles.remove(article)
+            # I commented these out because they shouldn't be necessary anymore
+            # if re.search('lists?', article.lower()): # Get rid of article if 'list' or 'lists' is in the title
+                # add_article = False
+            # elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation' is in the title
+                # add_article = False
                 
+            if add_article:
+                new_articles.append(article)
         articles_total.append(new_articles)
         
     return articles_total
