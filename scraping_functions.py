@@ -5,6 +5,7 @@ import numpy as np
 import re
 import spacy
 
+from pprint import pprint
 from SPARQLWrapper import SPARQLWrapper, JSON
 from tqdm import tqdm
 
@@ -36,18 +37,24 @@ multi_categories = [
     "Universities and colleges"
 ]
 
+# All categories
 categories = sorted(list(general_categories.keys()) + list(occupation_categories.keys()) + multi_categories)
+
+sparql = SPARQLWrapper('https://query.wikidata.org/sparql')
+sparql.setReturnFormat(JSON)
 
 def get_sparql_request(category):
     '''
-    Generates a SPARQL that returns a list of titles of Wikipedia articles about items of the given category.
-        - category: the name of the category
+    Generates a SPARQL query for retrieving article titles from a given category.
+    Arguments:
+        `category`: the name of the category
+    Returns:
+        A SPARQL query for retrieving titles of articles belonging to `category`
     '''
     
     # Add SPARQL prefixes and select all Wikidata items
     query = "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"
-    query += "SELECT ?articlename WHERE {{"
-    
+    query += "SELECT ?articlename ?wditem WHERE {{"
     
     if category in occupation_categories.keys():
         # Wikidata elements that have an occupation that is either the category, or of an element that is a subclass of the category
@@ -72,300 +79,331 @@ def get_sparql_request(category):
 
 #%%
 
-def get_articles(cat_list, num_results): #min_sents):
-    # **Add parameter to check number of sentences per article (either here or in 'get_content' function)**
-    # Tried creating this function with RDF/SPARQL but had trouble looping through queries for each category,
-    # but this method seems to be working well, so it should be fine
-    
+def get_articles(cat_list, num_results):
     '''
-    This function takes a list of categories and gets a specified number
-    of wikipedia articles relating to each category:
-        - cat_list: list of categories
-        - num_results: number of articles to get for each category
+    Generates a list of lists of Wikipedia article titles (one list per category)
+    Arguments:
+        `cat_list`:    A list of plain text categories
+        `num_results`: The maximum number of articles to retrieve per category
+    Returns a tuple containing:
+        A list of lists of Wikipedia article titles (one list per category)
+        A list of lists of corresponding Wikidata item names (one list per category)
     '''
     
-    sparql = SPARQLWrapper('https://query.wikidata.org/sparql')
-    sparql.setReturnFormat(JSON)
+    articles = [] # List of lists of articles (one list per category)
+    wd_items = [] # List of lists Wikidata items (one list per category)
     
-    #nlp = spacy.load('en_core_web_sm') <- part of testing number of sentences
-    
-    articles_total = [] # List containing a list of articles for each category
-    
-    for cat in tqdm(cat_list, desc='Retrieving articles'): # For each category in the 'categories' list
+    for cat in tqdm(cat_list, desc='Retrieving all articles'):
+        # For each category, retrieve the list of relevant Wikipedia articles
         sparql_request = get_sparql_request(cat).format(num_results)
         sparql.setQuery(sparql_request)
         results = sparql.queryAndConvert()['results']['bindings']
         
-        new_articles = []
-        for result in results: # For every article that was retrieved for a specific category
+        cat_articles = []
+        cat_wd_items = []
+        
+        # Retrieve individual Wikipedia articles
+        for result in tqdm(results, desc=f'Retrieving articles for category [{cat}]'):
             article = result['articlename']['value']
-            add_article = True
-        
-            '''
-            * Idea I was testing to check number of sentences (not currently working)
+            wd_item = result['wditem']['value']
             
-            page = wptools.page(article)
-            page.get_query()
-            text = page.data['extext']
-            sp_text = nlp(text)
-            
-            sents = []
-    
-            for sentence in sp_text.sents:
-                    sents.append(sentence)
-            if len(sents) < min_sents:
-                add_article = False
-            '''
-            # I commented these out because they shouldn't be necessary anymore
-            # if re.search('lists?', article.lower()): # Get rid of article if 'list' or 'lists' is in the title
-                # add_article = False
-            # elif re.search('disambiguation', article.lower()): # Get rid of article if 'disambiguation' is in the title
-                # add_article = False
-                
-            if add_article:
-                new_articles.append(article)
-        articles_total.append(new_articles)
+            cat_articles.append(article)
+            cat_wd_items.append(wd_item)
+        articles.append(cat_articles)
+        wd_items.append(cat_wd_items)
         
-    return articles_total
+    return articles, wd_items
         
 #%%
 
-def get_titles_info(article_list):
-    
+def get_titles_info(articles):
     '''
-    This function gets all of the titles & infoboxes for the articles fetched via the get_articles function
-    - article_list: list of articles returned from the get_articles function
+    Retrieves all of the titles and infoboxes for a list of lists of articles (one list per category)
+    Arguments:
+        `articles`: A list of lists of articles, such as the first list returned by `get_articles`
+    Returns a tuple containing two lists:
+        - A list of lists of article titles (one list per category)
+        - A list of lists of article infoboxes (one list per category)
     '''
     
-    titles_total = [] # Contains all of the titles 
-    infoboxes_total = [] # infoboxes of the pages
-    counter = 0
+    titles = []
+    infoboxes = []
     
-    for cat in article_list: # For every category in article_list
+    # For every category
+    for i, cat in enumerate(articles):
         cat_titles = []
         cat_boxes = []
-        counter += 1
-        for art in tqdm(cat, desc=f'Retrieving titles & infoboxes ({counter}/{len(article_list)})'): # For every article in a specific category
-            page = wptools.page(art)
+        
+        # For each article in the given category
+        for art in tqdm(cat, desc=f'Retrieving titles & infoboxes ({i + 1}/{len(articles)})'):
+            
+            # Retrieve the article title
+            page = wptools.page(art, silent=True)
             page.get_parse()
             page_name = page.data['title']
             cat_titles.append(page_name)
-            print(f'{art} title retrieved')
             
+            # Retrieve the article infobox
             if page.data['infobox']:
-                page_infobox = page.data['infobox']
-                cat_boxes.append(page_infobox)
-                print(f'{art} infobox retrieved')
+                cat_boxes.append(page.data['infobox'])
             else:
                 cat_boxes.append(None)
-                print(f'{art} does not have an infobox')
             
-        titles_total.append(cat_titles)
-        infoboxes_total.append(cat_boxes)
+        titles.append(cat_titles)
+        infoboxes.append(cat_boxes)
         
-    return titles_total, infoboxes_total
-    
-    
+    return titles, infoboxes
+
+
 #%%
 
-def get_content(titles_total, infoboxes_total):
-
+def get_content(titles, min_sents):
     '''
-    This function gets the content from all of the article titles in the total_titles list
-    - titles_total: list of all of the article titles retreived
-    - infoboxes_total: list of all of the infoboxes retreived
-    
-    **I used the wikipedia package rather than wptools here because the wikipedia package seems to get way more text than wptools**
+    Fetches the content of all of articles whose title is in a given list of lists (one list per category)
+    Arguments:
+        `titles`:    A list of lists of article titles (one list per category)
+        `min_sents`: The minimum number of sentences per article
+    Returns:
+        A list of lists of content for all input articles (one list per category)
     '''    
 
-    content_total = [] # content of the pages
+    content = []
 
-    for cat_index, cat in enumerate(titles_total): # For every category in title_list
-        cat_cont_list = [] # List of all of the content for a specific category
-        for title_index, title in tqdm(enumerate(cat), desc=f'Retreiving content ({cat_index + 1}/{len(titles_total)})'): # For every title in a specific category
+    # For each category
+    for i, cat in enumerate(titles):
+        cat_content = []
+        
+        # For every article title of the category
+        for title in tqdm(cat, desc=f'Retrieving content ({i + 1}/{len(titles)})'):
+            page_content = ''
             try:
-                page = wikipedia.page(title)
-                cat_cont_list.append(page.content)
-                print(f'{title} content retrieved')  
+                # Retrieve the corresponding article and its content
+                page = wikipedia.page(title, auto_suggest=False, redirect=False)
+                page_content = page.content
                 
-                ''' 
-                For the exceptions below, I just try to retrieve content using wptools rather than wikipedia
-                - Even though wptools retrieves less content than the wikipedia package, I figure it is better than
-                  putting a null value for the content of an article; null values are only entered if neither wikipedia
-                  nor wptools can find the content
-                '''
+            # In case of error, try using wptools
             except wikipedia.exceptions.PageError:
                 try:
-                    page = wptools.page(title)
+                    page = wptools.page(title, silent=True)
                     page.get_query()
                     page_content = page.data['extext']
-                    cat_cont_list.append(page_content)
-                    print(f'{title} content retrieved')
                 except ValueError:
-                    cat_cont_list.append(None)
-                    print(f'{title} content not found')
-            except wikipedia.exceptions.DisambiguationError: #as many:
-                try:
-                    page = wptools.page(title)
-                    page.get_query()
-                    page_content = page.data['extext']
-                    cat_cont_list.append(page_content)
-                    print(f'{title} content retrieved')
-                except ValueError:
-                    cat_cont_list.append(None)
-                    print(f'{title} content not found')
-               
-        content_total.append(cat_cont_list)
+                    pass
+            
+            # Disambiguation pages are not relevant for us as we would need to pick which page is the correct one
+            # Similarly, redirection pages usually redirect to "List of [...]" pages which could be retrieved multiple times
+            except (wikipedia.exceptions.DisambiguationError, wikipedia.exceptions.RedirectError):
+                pass
+            
+            # Check the amount of sentences in the text
+            nb_sents = len(list(nlp(page_content).sents))
+                    
+            if nb_sents > min_sents:
+                cat_content.append(page_content)
+            else:
+                cat_content.append(None)
+        content.append(cat_content)
         
-    return content_total
+    return content
+
+     
+#%%
+
+def get_descriptions(wd_items):
+    '''
+    Fetches the description of all Wikidata items whose name is in a given list of lists (one list per category)
+    Arguments:
+        `wd_items`: A list of lists of Wikidata item names, such as the second list returned by `get_articles`
+    Returns:
+        A list of lists of descriptions for all input items (one list per category)
+    '''    
+
+    descriptions = []
+    
+    query = "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX schema: <http://schema.org/>"
+    query += "SELECT ?desc WHERE {{ <{0}> schema:description ?desc. FILTER ( lang(?desc) = \"en\" ) }}"
+
+    # For each category
+    for i, cat in enumerate(wd_items):
+        cat_description = []
+        
+        # For every article title of the category
+        for wd_item in tqdm(cat, desc=f'Retrieving description ({i + 1}/{len(wd_items)})'):
+            
+            # Retrieve the Wikidata description
+            sparql.setQuery(query.format(wd_item))
+            
+            description = ''
+            results = sparql.queryAndConvert()['results']['bindings']
+            if results:
+                description = results[0]['desc']['value']
+            
+            if description:
+                cat_description.append(description)
+            else:
+                cat_description.append(None)
+        descriptions.append(cat_description)
+        
+    return descriptions
 
      
 #%%
 
 def get_triples(page_name):
-    
     '''
-    This function gets all of the triples for a given page and
-    organizes them in a list of lists
+    Gets all of the triples from the Wikidata page associated with a given Wikipedia article and organizes them in a list
+    Arguments:
+        `page_name`: The name of the Wikipedia article
+    Returns:
+        A list of triples from the Wikidata page associated with the article
     '''
     
-    triples_list = [] # List of all of the triples for one article
+    # TODO (Max): Maybe this whole function could be converted into a SPARQL query? That way we wouldn't need to split things manually
     
+    triples = []
+    
+    # Retrieve Wikipedia article and associated Wikidata information
     page = wptools.page(page_name, silent=True)
+    page.get_wikidata()
+    wd = page.data['wikidata']
     
-    try:
-        page.get_wikidata()
+    # Loop through all triples
+    for pred, values in wd.items():
+    
+        # Write string values directly
+        if type(values) is str:
+            triples.append([pred, values])
         
-        for x in page.data['wikidata']: # For each triple in the list of wikidata triples
-            if type(page.data['wikidata'][x]) is str:
-                one_triple = [] # lists for one triple, to be added to the full list of triples 'triples_list'
-                one_triple.append(x)
-                one_triple.append(page.data["wikidata"][x])
-                triples_list.append(one_triple)
-            if type(page.data['wikidata'][x]) is list:
-                for item in page.data['wikidata'][x]:
-                    if type(item) is str:
-                        one_triple = []
-                        one_triple.append(x)
-                        one_triple.append(item)
-                        triples_list.append(one_triple)
-                    elif type(item) is dict:
-                        for key in item:
-                            one_triple = []
-                            one_triple.append(x)
-                            one_triple.append(key)
-                            one_triple.append(item[key])
-                            triples_list.append(one_triple)
-            elif type(page.data['wikidata'][x]) is dict:
-                for key in page.data['wikidata'][x]:
-                    value = page.data["wikidata"][x][key]
-                    if type(value) is str:
-                        one_triple = []
-                        one_triple.append(x)
-                        one_triple.append(key)
-                        one_triple.append(value)
-                        triples_list.append(one_triple)
-                    elif type(value) is list:
-                        for index in value:
-                            one_triple = []
-                            one_triple.append(x)
-                            one_triple.append(key)
-                            one_triple.append(index)
-                    
-    except LookupError:
-        pass
+        # For lists, add as many triples as there are elements
+        if type(values) is list:
+            for value in values:
+                # The list itself may contain strings or dictionaries
                 
-    return triples_list
+                # Write string values directly
+                if type(value) is str:
+                    triples.append([pred, value])
+                    
+                # For dicts, add one triple per key-value pair
+                elif type(value) is dict:
+                    for key, subvalue in value.items():
+                        triples.append([pred, key, subvalue])
+        
+        # For dicts, add one triple per key-value pair
+        elif type(values) is dict:
+            for subkey, subvalues in values.items():
+                # The dictionary values themselves may contain strings or lists
+                
+                # Write string values directly
+                if type(subvalues) is str:
+                    triples.append([pred, subkey, subvalues])
+                    
+                # For lists, add as many triples as there are elements
+                elif type(subvalues) is list:
+                    for subvalue in subvalues:
+                        triples.append([pred, subkey, subvalue])
+                
+    return triples
 
 #%%
 
-def combine_triples(titles_total):
+def combine_triples(titles):
+    '''
+    Gets all of the triples from many Wikidata pages associated with given Wikipedia articles and organizes them in a list of lists
+    Arguments:
+        `titles`: A list of lists of Wikipedia article titles (one list per category)
+    Returns:
+        A list of lists of triples from the Wikidata pages associated with the articles
+        (one list per category, containing itself one list of triples per article)
+    '''
+    triples = []
     
-    triples_total = [] # All of the triples for every articles
-    counter = 0
-    
-    for cat in titles_total: # For each category (inner list) within titles_total
-        cat_triples = [] # All of the triples for one category
-        counter += 1
-        for art in tqdm(cat, desc=f'Retrieving triples ({counter}/{len(titles_total)})'): # For each article in a specific category
+    # For each category
+    for i, cat in enumerate(titles):
+        cat_triples = []
+        
+        # For each article title in the category
+        for art in tqdm(cat, desc=f'Retrieving triples ({i + 1}/{len(titles)})'):
+        
+            # Retrieve triples and add them to our list
             triples_list = get_triples(art)
             if not triples_list:
                 cat_triples.append(None)
-                print(f'{art} triples not found')
             else:
                 cat_triples.append(triples_list)
-                print(f'{art} triples retrieved')
             
-        triples_total.append(cat_triples)
+        triples.append(cat_triples)
         
-    return triples_total
+    return triples
 
 #%%
 
-def combine_data(categories, titles, infoboxes, content, triples):
+def combine_data(categories, titles, infoboxes, content, descriptions, triples):
     
     '''
-    This function combines all of the data we have collected into a list of lists
+    Combines all of the data we have collected into a list of lists
     and converts it into a pandas dataframe
-    - categories: list of all of the wikipedia article categories
-    - titles: titles_total list from get_titles_info function
-    - infoboxes: infoboxes_total from get_titles_info function
-    - content: content_total from get_content function
-    - triples: triples_total from combine triples function
+    Arguments:
+    `categories`:   The list of all of the wikipedia article categories
+    `titles`:       The first list returned by `get_titles_info`
+    `infoboxes`:    The second list returned by `get_titles_info`
+    `content`:      The list returned by `get_content`
+    `descriptions`: The list returned by `get_descriptions`
+    `triples`:      The list returned by `combine_triples`
     '''
 
-    data_total = [] # List of lists containing all data
+    data = []
 
-    for cat_num, cat in enumerate(categories): # For every category in categories list
-        for index in range(len(titles[cat_num])): # For each item in each specific category
-            single_data = [] # List containing data from one article
-
-            single_data.append(cat_num) # Keeping category number will make it easier to evaluate clustering
-            single_data.append(cat)
-            single_data.append(titles[cat_num][index])
-            single_data.append(infoboxes[cat_num][index])
-            single_data.append(content[cat_num][index])
-            single_data.append(triples[cat_num][index])
+    # For each category
+    for i, cat in enumerate(categories):
+    
+        # For each article from the category
+        for j in range(len(titles[i])):
+        
+            # Append all data from one article.
+            # Keeping the category number will make it easier to evaluate clustering
+            data.append([i, cat, titles[i][j], infoboxes[i][j], content[i][j], descriptions[i][j], triples[i][j]])
             
-            data_total.append(single_data) # Append all data from one article to data_total list
-            
-    df = pd.DataFrame(data_total, columns = ['Category_num', 'Category', 'Title', 'Infobox', 'Content', 'Triples']) # Pandas dataframe containing all of the collected data
+    # Pandas dataframe containing all of the collected data
+    df = pd.DataFrame(data, columns=['Category_num', 'Category', 'Title', 'Infobox', 'Content', 'Description', 'Triples']) 
     
     null_data = {} # The number of null values for each column
     null_data['Title'] = f'{df["Title"].isnull().sum()} null title items'
     null_data['Infobox'] = f'{df["Infobox"].isnull().sum()} null infobox items'
     null_data['Content'] = f'{df["Content"].isnull().sum()} null content items'
+    null_data['Description'] = f'{df["Description"].isnull().sum()} null description items'
     null_data['Triples'] = f'{df["Triples"].isnull().sum()} null triples items'
     
     group_data = df.groupby(['Category']).count() # The number of datapoints for each category
     
-    print('Data successfully combined.')
-    
-    return data_total, group_data, null_data, df
+    return data, group_data, null_data, df
 
 #%%
 # Testing
 
-articles_total = get_articles(categories, num_results=50)
-titles_total, infoboxes_total = get_titles_info(articles_total)
-content_total = get_content(titles_total, infoboxes_total)
-triples_total = combine_triples(titles_total)
-data_total, group_data, null_data, df = combine_data(categories, titles_total, infoboxes_total, content_total, triples_total)
+nlp = spacy.load('en_core_web_sm')
+articles, wd_items = get_articles(categories, num_results=100)
+titles, infoboxes = get_titles_info(articles)
+content = get_content(titles, min_sents=20)
+descriptions = get_descriptions(wd_items)
+triples = combine_triples(titles)
+data, group_data, null_data, df = combine_data(categories, titles, infoboxes, content, descriptions, triples)
 
 #%%
 
+print('>>> Dataframe info <<<')
 print(df.info())
+print('>>> Grouped data <<<')
 print(group_data)
+print('>>> Null data <<<')
 print(null_data)
 
 #%%
 
-index = np.random.randint(0,len(df['Category']))
-print(f'Category: {df["Category"][index]}\n')
-print(f'Title: {df["Title"][index]}\n')
-print(f'Infobox: {df["Infobox"][index]}\n')
-print(f'Content: {df["Content"][index]}\n')
-print(f'Triples: {df["Triples"][index]}\n')
+print('Displaying random category data')
+index = np.random.randint(0, len(df['Category']))
 
+for column in ['Category', 'Title', 'Infobox', 'Content', 'Description', 'Triples']:
+    print('> Column [' + column + ']:')
+    pprint(df[column][index])
 
-
+df.to_json('scraped_data.json')
