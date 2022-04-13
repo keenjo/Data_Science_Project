@@ -1,9 +1,12 @@
-import wptools
-import wikipedia
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pycurl
 import re
 import spacy
+import time
+import urllib
+import wikipedia
+import wptools
 
 from pprint import pprint
 from SPARQLWrapper import SPARQLWrapper, JSON
@@ -139,7 +142,17 @@ def get_titles_info(articles):
             
             # Retrieve the article title
             page = wptools.page(art, silent=True)
-            page.get_parse()
+            
+            # Retry again and again when there's an error
+            while True:
+                try:
+                    page.get_parse()
+                    break
+                except pycurl.error:
+                    print('pycurl error caught, trying again in 60 seconds')
+                    time.sleep(60)
+                    continue
+                    
             page_name = page.data['title']
             cat_titles.append(page_name)
             
@@ -234,7 +247,16 @@ def get_descriptions(wd_items):
             sparql.setQuery(query.format(wd_item))
             
             description = ''
-            results = sparql.queryAndConvert()['results']['bindings']
+            # Retry again and again when there's an error
+            while True:
+                try:
+                    results = sparql.queryAndConvert()['results']['bindings']
+                    break
+                except urllib.error.HTTPError:
+                    print('HTTPError caught, trying again in 60 seconds')
+                    time.sleep(60)
+                    continue
+                
             if results:
                 description = results[0]['desc']['value']
             
@@ -258,13 +280,25 @@ def get_triples(page_name):
         A list of triples from the Wikidata page associated with the article
     '''
     
-    # TODO (Max): Maybe this whole function could be converted into a SPARQL query? That way we wouldn't need to split things manually
+    # TODO (Max): Maybe this whole function could be converted into a SPARQL query?
+    # That way we wouldn't need to split things manually
+    # But it would require filtering triples based on whether they appear on Wikidata or not
     
     triples = []
     
     # Retrieve Wikipedia article and associated Wikidata information
     page = wptools.page(page_name, silent=True)
-    page.get_wikidata()
+    # Retry again and again when there's an error
+    while True:
+        try:
+            page.get_wikidata()
+            break
+        except pycurl.error:
+            print('pycurl error caught, trying again in 60 seconds')
+            time.sleep(60)
+            continue
+        except LookupError:
+            return []
     wd = page.data['wikidata']
     
     # Loop through all triples

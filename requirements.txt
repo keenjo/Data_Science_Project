@@ -1,0 +1,9 @@
+numpy==1.22.2
+pandas==1.4.0
+pycurl==7.44.1
+requests==2.22.0
+spacy==3.2.1
+SPARQLWrapper==2.0.0
+tqdm==4.62.3
+wikipedia==1.4.0
+wptools==0.4.17
