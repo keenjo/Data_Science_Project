@@ -39,7 +39,8 @@ def preprocess(text):
                 tokens.append(token)
     return tokens
 
-df = pd.read_json('/Users/josephkeenan/git_repos/Data_Science_Project/scraped_data.json')
+# Insert directory of your scraped data in function below
+df = pd.read_json('scraped_data.json')
 
 # Convert to a new dataframe
 data = zip(
@@ -53,4 +54,6 @@ data = zip(
 )
 
 converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description'])
-converted_df.to_json('/Users/josephkeenan/Desktop/preprocessed_data.json', default_handler=str)    
+# Insert directory/name of file on your computer in function below
+converted_df.to_json('preprocessed_data.json', default_handler=str) 
+   
