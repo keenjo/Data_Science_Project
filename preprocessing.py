@@ -39,10 +39,12 @@ def preprocess(text):
                 tokens.append(token)
     return tokens
 
-df = pd.read_json('scraped_data.json')
+df = pd.read_json('/Users/josephkeenan/git_repos/Data_Science_Project/scraped_data.json')
 
 # Convert to a new dataframe
 data = zip(
+    df['Category_num'],
+    df['Category'],
     df['Title'],
     df['Content'],
     df['Content'].progress_apply(preprocess),
@@ -50,5 +52,5 @@ data = zip(
     df['Description'].progress_apply(preprocess)
 )
 
-converted_df = pd.DataFrame(data, columns=['Item', 'Text', 'Processed text', 'Description', 'Processed description'])
-converted_df.to_json('preprocessed_data.json', default_handler=str)
+converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description'])
+converted_df.to_json('/Users/josephkeenan/Desktop/preprocessed_data.json', default_handler=str)    
