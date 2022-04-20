@@ -55,3 +55,4 @@ data = zip(
 converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description'])
 converted_df = converted_df.dropna()
 converted_df.to_json('preprocessed_data.json', default_handler=str)
+converted_df.to_json('preprocessed_data.json', default_handler=str) 
