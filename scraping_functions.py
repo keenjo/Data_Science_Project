@@ -100,7 +100,15 @@ def get_articles(cat_list, num_results):
         # For each category, retrieve the list of relevant Wikipedia articles
         sparql_request = get_sparql_request(cat).format(num_results)
         sparql.setQuery(sparql_request)
-        results = sparql.queryAndConvert()['results']['bindings']
+        # Retry again and again when there's an error
+        while True:
+            try:
+                results = sparql.queryAndConvert()['results']['bindings']
+                break
+            except urllib.error.HTTPError:
+                print('HTTPError caught, trying again in 60 seconds')
+                time.sleep(60)
+                continue
         
         cat_articles = []
         cat_wd_items = []
@@ -417,7 +425,7 @@ def combine_data(categories, titles, infoboxes, content, descriptions, triples):
 nlp = spacy.load('en_core_web_sm')
 articles, wd_items = get_articles(categories, num_results=100)
 titles, infoboxes = get_titles_info(articles)
-content = get_content(titles, min_sents=20)
+content = get_content(titles, min_sents=5)
 descriptions = get_descriptions(wd_items)
 triples = combine_triples(titles)
 data, group_data, null_data, df = combine_data(categories, titles, infoboxes, content, descriptions, triples)
