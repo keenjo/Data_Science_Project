@@ -149,7 +149,7 @@ data = zip(
 converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 'POS', 'NER'])
 converted_df.to_json('preprocessed_data.json', default_handler=str)
  
-group_data = df.groupby(['Category']).count() # The number of datapoints for each category
+group_data = converted_df.groupby(['Category']).count() # The number of datapoints for each category
 
 print('>>> Grouped data <<<')
 print(group_data)
