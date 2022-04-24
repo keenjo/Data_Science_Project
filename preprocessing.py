@@ -164,10 +164,11 @@ data = zip(
     df['Description'],
     df['Description'].progress_apply(preprocess),
     preprocessed_text.progress_apply(pos),
-    df['Content'].progress_apply(ner)
+    df['Content'].progress_apply(ner),
+    preprocessed_text.progress_apply(lemma)
 )
 
-converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 'POS', 'NER'])
+converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 'POS', 'NER', 'Lemmas'])
 converted_df.to_json('preprocessed_data.json', default_handler=str)
  
 group_data = converted_df.groupby(['Category']).count() # The number of datapoints for each category
