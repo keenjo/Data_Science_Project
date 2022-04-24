@@ -35,7 +35,7 @@ def preprocess(text):
     # Remove stopwords and punctuation
     for sent in sp_text.sents:
         for token in sent:
-            if token.text.lower() not in STOP_WORDS and not all(char in string.punctuation for char in token.text) and not token.text.isspace():
+            if token.text.lower() not in STOP_WORDS and not all(char in string.punctuation for char in token.text) and not token.text.isspace() and not token.text.isdigit():
                 tokens.append(token)
     return tokens
 
@@ -89,6 +89,27 @@ def ner(text):
         ner.append(ner_val)
         
     return ner
+
+
+def lemma(tokens):
+    '''
+    Function to extract lemmas from the list of tokens
+
+    Parameters
+    ----------
+    tokens: a list of tokens
+
+    Returns
+    -------
+    lemmas: a list of lemmatized tokens
+
+    '''
+    lemmas = []
+    
+    for token in tokens:
+        lemmas.append(token.lemma_)
+        
+    return lemmas
 
 
 def drop_null(df, drop_description=False):
