@@ -23,7 +23,7 @@ general_categories = {
     "Foods"                    : "wd:Q2095",
     "Transport"                : "wd:Q334166",
     "Sports teams"             : "wd:Q12973014",
-    "Written communication"    : "wd:Q1149626"
+    "Language"                 : "wd:Q34770"
 }
 
 # Categories for which we want to retrieve elements that have that category as their occupation
