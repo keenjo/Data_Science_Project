@@ -35,7 +35,7 @@ def preprocess(text):
     # Remove stopwords and punctuation
     for sent in sp_text.sents:
         for token in sent:
-            if token.text.lower() not in STOP_WORDS and not token.is_punct and not token.is_space and not token.is_digit:
+            if token.text.lower() not in STOP_WORDS and not all(char in string.punctuation for char in token.text) and not token.is_space and not token.is_digit:
                 tokens.append(token)
     return tokens
 
