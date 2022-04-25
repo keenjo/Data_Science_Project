@@ -63,6 +63,29 @@ def pos(tokens):
         pos.append(pos_val)
         
     return pos
+
+
+def nouns(tokens):
+    # Function to only extract noun POS tokens from text
+    pos = []
+    
+    for token in tokens:
+        if token[0] == 'NOUN':
+            pos.append(token[1])
+            
+    return pos
+
+
+def verbs(tokens):
+    # Function to only extract verb POS tokens from text
+    
+    pos = []
+    
+    for token in tokens:
+        if token[0] == 'VERB':
+            pos.append(token[1])
+            
+    return pos
   
         
 def ner(text):
@@ -87,6 +110,15 @@ def ner(text):
         ner_val.append(word.label_)
         ner_val.append(word)
         ner.append(ner_val)
+        
+    return ner
+
+
+def ner_tokens(tokens):
+    # Function to only extract the NER tokens without their labels
+    
+    for word in tokens:
+        ner.append(word[1])
         
     return ner
 
@@ -153,6 +185,8 @@ df = pd.read_json('scraped_data.json')
 df = drop_null(df, drop_description=False)
 
 preprocessed_text = df['Content'].progress_apply(preprocess)
+POS = preprocessed_text.progress_apply(pos)
+NER = df['Content'].progress_apply(ner)
 
 # Convert to a new dataframe
 data = zip(
@@ -163,12 +197,17 @@ data = zip(
     preprocessed_text,
     df['Description'],
     df['Description'].progress_apply(preprocess),
-    preprocessed_text.progress_apply(pos),
-    df['Content'].progress_apply(ner),
-    preprocessed_text.progress_apply(lemma)
+    POS,
+    POS.progress_apply(nouns),
+    POS.progress_apply(verbs),
+    NER,
+    NER.progress_apply(ner_tokens),
+    preprocessed_text.progress_apply(lemma),
+    df['Triples']
 )
 
-converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 'POS', 'NER', 'Lemmas'])
+converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 
+                                           'POS', 'Nouns', 'Verbs', 'NER', 'NER Tokens', 'Lemmas', 'Triples'])
 converted_df.to_json('preprocessed_data.json', default_handler=str)
  
 group_data = converted_df.groupby(['Category']).count() # The number of datapoints for each category
