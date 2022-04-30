@@ -180,6 +180,17 @@ def drop_null(df, drop_description=False):
     return df
 
 
+def process_triples(triples):
+    
+    new_triples = []
+   
+    for triple in triples:
+        st_triples = ' '.join(str(item) for item in triple)
+        new_triples.append(st_triples)
+            
+    return new_triples
+
+
 df = pd.read_json('scraped_data.json')
 
 df = drop_null(df, drop_description=False)
@@ -203,11 +214,12 @@ data = zip(
     NER,
     NER.progress_apply(ner_tokens),
     preprocessed_text.progress_apply(lemma),
-    df['Triples']
+    df['Triples'],
+    df['Triples'].progress_apply(process_triples)
 )
 
-converted_df = pd.DataFrame(data, columns=['Category number', 'Category', 'Title', 'Text', 'Processed text', 'Description', 'Processed description', 
-                                           'POS', 'Nouns', 'Verbs', 'NER', 'NER Tokens', 'Lemmas', 'Triples'])
+converted_df = pd.DataFrame(data, columns=['category number', 'category', 'title', 'text', 'processed text', 'description', 'processed description', 
+                                           'POS', 'nouns', 'verbs', 'NER', 'NER tokens', 'lemmas', 'triples', 'processed triples'])
 converted_df.to_json('preprocessed_data.json', default_handler=str)
  
 group_data = converted_df.groupby(['Category']).count() # The number of datapoints for each category
