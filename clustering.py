@@ -7,7 +7,7 @@ from sklearn.manifold import TSNE
 import seaborn as sns
 
 
-#%%
+# %%
 def cluster_data(corpus, labels, max_features=500, use_idf=True):
     """
     The function to cluster the feature
@@ -44,16 +44,16 @@ def cluster_data(corpus, labels, max_features=500, use_idf=True):
         v_metrics[K] = dict()
 
         v_metrics[K]["inertia"] = km.inertia_  # Inertia
-        v_metrics[K]["silhouette"] = metrics.silhouette_score(matrix, km.labels_, metric="euclidean")   # Silhouette
-        v_metrics[K]["homogeneity"] = metrics.homogeneity_score(labels, km.labels_)                     # Homogeneity
-        v_metrics[K]["completeness"] = metrics.completeness_score(labels, km.labels_)                   # Completeness
-        v_metrics[K]["v_measure"] = metrics.v_measure_score(labels, km.labels_)                         # V Measure
-        v_metrics[K]["rand_index"] = metrics.adjusted_rand_score(labels, km.labels_)                    # Adjusted Rand Index
+        v_metrics[K]["silhouette"] = metrics.silhouette_score(matrix, km.labels_, metric="euclidean")  # Silhouette
+        v_metrics[K]["homogeneity"] = metrics.homogeneity_score(labels, km.labels_)  # Homogeneity
+        v_metrics[K]["completeness"] = metrics.completeness_score(labels, km.labels_)  # Completeness
+        v_metrics[K]["v_measure"] = metrics.v_measure_score(labels, km.labels_)  # V Measure
+        v_metrics[K]["rand_index"] = metrics.adjusted_rand_score(labels, km.labels_)  # Adjusted Rand Index
 
     return kms, matrix, v_metrics
 
 
-#%%
+# %%
 def plot_km_model(kms, K, matrix):
     """
     Plot the results of the selected KMeans model
@@ -88,7 +88,7 @@ def plot_km_model(kms, K, matrix):
     pass
 
 
-#%%
+# %%
 # Configuration
 _max_features = 500
 _feature = "triples"
@@ -114,16 +114,16 @@ labels = df["category number"]
 # Cluster the data
 kms, matrix, v_metrics = cluster_data(corpus, labels, max_features=_max_features)
 
-
-#%%
+# %%
 # Plot the clusters
 plot_km_model(kms, 16, matrix)
 
 
-#%%
+# %%
 # Examine the metrics
 def examine_metrics(v_metrics):
     # Lists to store metric values
+    num_of_clusters = []
     inertias = []
     silhouettes = []
     homogeneities = []
@@ -133,6 +133,7 @@ def examine_metrics(v_metrics):
 
     for K in range(2, 17):
         # For each number of cluster, get the corresponding metric values
+        num_of_clusters.append(K)
         inertias.append(v_metrics[K]["inertia"])
         silhouettes.append(v_metrics[K]["silhouette"])
         homogeneities.append(v_metrics[K]["homogeneity"])
@@ -143,18 +144,19 @@ def examine_metrics(v_metrics):
     plt.figure(figsize=[12, 8])
     plt.xlabel("Clusters")
 
-    plt.plot(silhouettes, label="Silhouette")
-    plt.plot(homogeneities, label="Homogeneity")
-    plt.plot(completenesses, label="Completeness")
-    plt.plot(v_measures, label="V_measure")
-    plt.plot(rand_indices, label="Adjusted Rand-index")
-
-    plt.legend()
+    plotdf = pd.DataFrame()
+    # plotdf["Number of clusters"] = num_of_clusters
+    plotdf.index = num_of_clusters
+    plotdf["Silhouette"] = silhouettes
+    plotdf["Homogeneity"] = homogeneities
+    plotdf["Completeness"] = completenesses
+    plotdf["V Measure"] = v_measures
+    plotdf["ARI"] = rand_indices
+    plotdf.plot.line()
     plt.title("Metrics for clustering with the number of clusters ranging from 2 to 16")
     plt.show()
 
 
 examine_metrics(v_metrics)
 
-
-#%%
+# %%
