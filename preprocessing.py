@@ -116,6 +116,7 @@ def ner(text):
 
 def ner_tokens(tokens):
     # Function to only extract the NER tokens without their labels
+    ner = []
     
     for word in tokens:
         ner.append(word[1])
@@ -222,7 +223,7 @@ converted_df = pd.DataFrame(data, columns=['category number', 'category', 'title
                                            'POS', 'nouns', 'verbs', 'NER', 'NER tokens', 'lemmas', 'triples', 'processed triples'])
 converted_df.to_json('preprocessed_data.json', default_handler=str)
  
-group_data = converted_df.groupby(['Category']).count() # The number of datapoints for each category
+group_data = converted_df.groupby(['category']).count() # The number of datapoints for each category
 
 print('>>> Grouped data <<<')
 print(group_data)
