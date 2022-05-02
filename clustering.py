@@ -31,9 +31,12 @@ def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True
 
     kms = dict()  # A list to store models
     v_metrics = dict()  # A dictionary to store metrics
+    centroids = dict()
 
     print("Clustering the data using {0} features".format(max_features))
-    print("Feature names", tfidf.get_feature_names())
+    
+    features = tfidf.get_feature_names_out()
+    #print("Feature names", tfidf.get_feature_names())
     for K in range(2, max_clusters + 1):
         print("Current number of clusters: {0}/{1}".format(K, max_clusters))
         # Instantiate the Kmeans model and fit it to the data
@@ -50,9 +53,59 @@ def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True
         v_metrics[K]["completeness"] = metrics.completeness_score(labels, km.labels_)  # Completeness
         v_metrics[K]["v_measure"] = metrics.v_measure_score(labels, km.labels_)  # V Measure
         v_metrics[K]["rand_index"] = metrics.adjusted_rand_score(labels, km.labels_)  # Adjusted Rand Index
+        
+        centroids[K] = km.cluster_centers_.argsort()
 
-    return kms, matrix, v_metrics
+    return kms, matrix, v_metrics, centroids, features
 
+#%%
+
+def test_num_features(corpus, labels, max_clusters=16, use_idf=True):
+    
+    '''
+    Function to iterate through multiple numbers of tfidf features
+    to see how many features gives us the best result for the kmeans evaluation
+    
+    num_clusters: numer of clusters to use
+    - default is 2, but user is encouraged to enter the value that gets the best result
+      from the 'test_clusters' function
+    '''
+    
+    total_results = {}
+        
+    num_features = [10, 30, 50, 70, 90, 100, 150]
+        
+    for num in num_features:
+        
+        print(f'Testing {num} tfidf features')
+        
+        # Instantiate a vectoriser
+        tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+        # Fit the vectoriser to the data
+        matrix = tfidf.fit_transform(corpus)
+        
+        # Instantiate the Kmeans model and fit it to the data
+        km = KMeans(n_clusters=16, max_iter=500, n_init=15, verbose=0)
+        km.fit(matrix)
+        
+        # Get the results
+        kms[num] = km  # Model
+        
+        result_values = {}
+        
+        result_values['Homogeneity'] = metrics.homogeneity_score(labels, km.labels_)
+        result_values['Completeness'] = metrics.completeness_score(labels, km.labels_)
+        result_values['V measure'] = metrics.v_measure_score(labels, km.labels_)
+        result_values['Adjusted Rand Score'] = metrics.adjusted_rand_score(labels, km.labels_)
+        result_values['Silhouette Score'] = metrics.silhouette_score(matrix, km.labels_, sample_size=1000)
+        
+        total_results[num] = result_values
+    
+    df_features = pd.DataFrame.from_dict(total_results, orient='index')
+
+    return df_features
+              
+        
 
 # %%
 def plot_km_model(kms, K, matrix):
@@ -115,7 +168,14 @@ labels = list(df["category number"])
 
 # %%
 # Cluster the data
-kms, matrix, v_metrics = cluster_data(corpus, labels, max_features=_max_features, max_clusters=_max_clusters)
+kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, max_clusters=_max_clusters)
+
+# Test data with different numbers of tfidf features
+df_features = test_num_features(corpus, labels, max_clusters=16, use_idf=True)
+
+#%%
+
+print(centroids[16])
 
 # %%
 # Plot the clusters
@@ -167,10 +227,28 @@ def examine_metrics(v_metrics):
     plotdf.plot.line()
     plt.title("Metrics for clustering with the number of clusters ranging from 2 to {0}".format(max_clusters))
     plt.show()
+    
+#%%
+
+def plot_diff_features(data):
+    
+    '''
+    Function to plot the effect of the number of tfidf features on the clustering evaluation
+    '''
+    
+    ax = sns.lineplot(data=data)
+    ax.set(xlabel='num_features', 
+       ylabel='measures', 
+       title='Number of features effect on evaluation metrics')
+    plt.show()
 
 
 # %%
 examine_metrics(v_metrics)
+
+#%%
+
+plot_diff_features(df_features)
 
 
 # %%
@@ -188,3 +266,37 @@ def examine_inertia(_v_metrics):
 examine_inertia(v_metrics)
 
 # %%
+
+def check_cluster_features(centroids, labels, features, num_clusters=2, num_features=10):
+    
+    '''
+    Function to print out the top features for each cluster
+    
+    num_clusters = number of clusters for which you would like to see the top terms
+    num_features = the number of features you would like to see per cluster
+    '''
+    
+    # Number of cluster labels
+    true_k = len(np.unique(labels))
+    
+    top_terms = {}
+    
+    # For each item in the labels
+    for x in range(true_k):
+        clust_terms = []
+        # Get the top 50 terms from each cluster centroid
+        for centroid in centroids[num_clusters][x, :num_features]:
+            clust_terms.append(features[centroid]) # features output from cluster_data function
+            
+        top_terms[x+1] = clust_terms
+    
+    return top_terms
+
+#%%
+
+top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
+
+#%%
+
+print(top_terms)
+
