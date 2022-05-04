@@ -1,9 +1,14 @@
+matplotlib==3.5.1
 numpy==1.22.2
 pandas==1.4.0
 pycurl==7.44.1
 requests==2.22.0
+seaborn==0.11.2
 scikit-learn==1.0.2
+scipy==1.7.3
+sklearn==0.0
 spacy==3.2.1
+en-core-web-sm==3.2.0
 SPARQLWrapper==2.0.0
 tqdm==4.62.3
 wikipedia==1.4.0
