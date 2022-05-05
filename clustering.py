@@ -7,9 +7,36 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
 import seaborn as sns
 
+#%%
+
+# Read the preprocessed file into DataFrame
+df = pd.read_json("data/preprocessed_data.json")
+
+
+#%%
+# Definition of all parameters neede for functions below
+
+# Lables to evaluate the clustering
+labels = list(df["category number"])
+
+# Number of tfidf features that you want to use when testing clustering
+_max_features = 32
+
+# Features that you would like to use in the tfidf vectorizer
+corpus = df["processed triples"]
+
+# Minimum number of clusters that you would like to test in the cluster data function
+_min_clusters = 8
+
+# Maximum number of clusters that you would like to test in the cluster data function
+_max_clusters = 30
+
+# List containing the different number of tfidf features you'd like to test
+num_features = [10, 30, 50, 70, 90, 100, 150]
+
 
 # %%
-def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True):
+def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=16, use_idf=True):
     """
     The function to cluster the feature
     Args:
@@ -22,7 +49,11 @@ def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True
     Returns:
     kms: KMeans model for each number of cluster
     matrix: The matrix vector of the corpus
-    v_metrics: Metrics for each number of clusters
+    v_metrics: Dictionary containing metrics for each number of clusters
+               where the key to each dictionary value is the number of clusters
+    centroids: Dictionary containing the centroids for each number of clusters
+               where the key to each dictionary value is the number of clusters
+    features: A list containing the all of the features chosen by the tfidf vectorizer
     """
     # Instantiate a vectoriser
     tfidf = TfidfVectorizer(max_features=max_features, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
@@ -37,7 +68,7 @@ def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True
     
     features = tfidf.get_feature_names_out()
     #print("Feature names", tfidf.get_feature_names())
-    for K in range(2, max_clusters + 1):
+    for K in range(min_clusters, max_clusters + 1):
         print("Current number of clusters: {0}/{1}".format(K, max_clusters))
         # Instantiate the Kmeans model and fit it to the data
         km = KMeans(n_clusters=K, max_iter=500, n_init=15, verbose=0)
@@ -57,58 +88,9 @@ def cluster_data(corpus, labels, max_features=500, max_clusters=16, use_idf=True
         centroids[K] = km.cluster_centers_.argsort()
 
     return kms, matrix, v_metrics, centroids, features
-
-#%%
-
-def test_num_features(corpus, labels, max_clusters=16, use_idf=True):
-    
-    '''
-    Function to iterate through multiple numbers of tfidf features
-    to see how many features gives us the best result for the kmeans evaluation
-    
-    num_clusters: numer of clusters to use
-    - default is 2, but user is encouraged to enter the value that gets the best result
-      from the 'test_clusters' function
-    '''
-    
-    total_results = {}
-        
-    num_features = [10, 30, 50, 70, 90, 100, 150]
-        
-    for num in num_features:
-        
-        print(f'Testing {num} tfidf features')
-        
-        # Instantiate a vectoriser
-        tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
-        # Fit the vectoriser to the data
-        matrix = tfidf.fit_transform(corpus)
-        
-        # Instantiate the Kmeans model and fit it to the data
-        km = KMeans(n_clusters=16, max_iter=500, n_init=15, verbose=0)
-        km.fit(matrix)
-        
-        # Get the results
-        kms[num] = km  # Model
-        
-        result_values = {}
-        
-        result_values['Homogeneity'] = metrics.homogeneity_score(labels, km.labels_)
-        result_values['Completeness'] = metrics.completeness_score(labels, km.labels_)
-        result_values['V measure'] = metrics.v_measure_score(labels, km.labels_)
-        result_values['Adjusted Rand Score'] = metrics.adjusted_rand_score(labels, km.labels_)
-        result_values['Silhouette Score'] = metrics.silhouette_score(matrix, km.labels_, sample_size=1000)
-        
-        total_results[num] = result_values
-    
-    df_features = pd.DataFrame.from_dict(total_results, orient='index')
-
-    return df_features
               
-        
-
 # %%
-def plot_km_model(kms, K, matrix):
+def plot_km_model(kms, matrix, K=16):
     """
     Plot the results of the selected KMeans model
 
@@ -140,47 +122,6 @@ def plot_km_model(kms, K, matrix):
     plt.title("Clustering plot for {0} clusters".format(K))
     plt.show()
     pass
-
-
-# %%
-# Configuration
-_max_features = 32
-_feature = "triples"
-_max_clusters = 30
-# Read the preprocessed file into DataFrame
-df = pd.read_json("data/preprocessed_data.json")
-
-
-# Create the corpus based on the tokens in features
-# This is data sensitive so it needs to be modified when the feature changes
-# The block below is to get the triples data
-def process_triples(triples):
-    new_triples = []
-    for triple in triples:
-        st_triples = ' '.join(str(item) for item in triple)
-        new_triples.append(st_triples)
-    return new_triples
-
-
-triples = df['triples'].apply(process_triples)
-corpus = triples
-labels = list(df["category number"])
-
-# %%
-# Cluster the data
-kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, max_clusters=_max_clusters)
-
-# Test data with different numbers of tfidf features
-df_features = test_num_features(corpus, labels, max_clusters=16, use_idf=True)
-
-#%%
-
-print(centroids[16])
-
-# %%
-# Plot the clusters
-plot_km_model(kms, 16, matrix)
-
 
 # %%
 # Examine the metrics
@@ -216,7 +157,6 @@ def examine_metrics(v_metrics):
         rand_indices.append(v_metrics[K]["rand_index"])
 
     # Start plotting
-    plt.figure(figsize=[12, 8])
     plotdf = pd.DataFrame()
     plotdf.index = num_of_clusters
     plotdf["Silhouette"] = silhouettes
@@ -228,6 +168,52 @@ def examine_metrics(v_metrics):
     plt.title("Metrics for clustering with the number of clusters ranging from 2 to {0}".format(max_clusters))
     plt.show()
     
+#%%
+
+def test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=True):
+    
+    '''
+    Function to iterate through multiple numbers of tfidf features
+    to see how many features gives us the best result for the kmeans evaluation
+    
+    max_clusters: number of clusters to use
+    - default is 16, but user is encouraged to enter the value that gets the best result
+      from the 'cluster_data' function
+    '''
+    
+    total_results = {}
+        
+        
+    for num in num_features:
+        
+        print(f'Testing {num} tfidf features')
+        
+        # Instantiate a vectoriser
+        tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+        # Fit the vectoriser to the data
+        matrix = tfidf.fit_transform(corpus)
+        
+        # Instantiate the Kmeans model and fit it to the data
+        km = KMeans(n_clusters=16, max_iter=500, n_init=15, verbose=0)
+        km.fit(matrix)
+        
+        # Get the results
+        kms[num] = km  # Model
+        
+        result_values = {}
+        
+        result_values['Homogeneity'] = metrics.homogeneity_score(labels, km.labels_)
+        result_values['Completeness'] = metrics.completeness_score(labels, km.labels_)
+        result_values['V measure'] = metrics.v_measure_score(labels, km.labels_)
+        result_values['Adjusted Rand Score'] = metrics.adjusted_rand_score(labels, km.labels_)
+        result_values['Silhouette Score'] = metrics.silhouette_score(matrix, km.labels_, sample_size=1000)
+        
+        total_results[num] = result_values
+    
+    df_features = pd.DataFrame.from_dict(total_results, orient='index')
+
+    return df_features
+
 #%%
 
 def plot_diff_features(data):
@@ -242,28 +228,18 @@ def plot_diff_features(data):
        title='Number of features effect on evaluation metrics')
     plt.show()
 
-
-# %%
-examine_metrics(v_metrics)
-
-#%%
-
-plot_diff_features(df_features)
-
-
 # %%
 def examine_inertia(_v_metrics):
-    plt.figure(figsize=[12, 8])
+    '''
+    Function to print out the inertia values for different numbers of clusters
+    '''
+    
     plotdf = pd.DataFrame()
     plotdf.index = [i for i in range(2, np.amax(list(_v_metrics.keys())) + 1)]
     plotdf["Inertia"] = [v_metrics[k]["inertia"] for k in range(2, np.amax(list(_v_metrics.keys())) + 1)]
     plotdf.plot.line()
     plt.title("Inertia values corresponding to the number of clusters")
     plt.show()
-
-
-# %%
-examine_inertia(v_metrics)
 
 # %%
 
@@ -294,9 +270,33 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
 
 #%%
 
+# Cluster the data
+kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters)
+
+# Test data with different numbers of tfidf features
+df_features = test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=True)
+
+# Get the top terms for each cluster
 top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
 
 #%%
 
-print(top_terms)
+# Plot the clusters for one of the kmeans models tested in the cluster_data function
+# The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
+plot_km_model(kms, matrix, K=16)
+
+#%%
+
+# Plot how inertia changes with different numbers of clusters
+examine_inertia(v_metrics)
+
+#%%
+
+# Plot how the metrics change with different numbers of clusters
+examine_metrics(v_metrics)
+
+#%%
+
+# Plot how the metrics change with different numbers of tfidf features
+plot_diff_features(df_features)
 
