@@ -32,7 +32,7 @@ _min_clusters = 8
 _max_clusters = 30
 
 # List containing the different number of tfidf features you'd like to test
-num_features = [10, 30, 50, 70, 90, 100, 150]
+num_features = [10, 30, 50, 70, 90, 100, 150, 200]
 
 
 # %%
@@ -125,7 +125,7 @@ def plot_km_model(kms, matrix, K=16):
 
 # %%
 # Examine the metrics
-def examine_metrics(v_metrics):
+def examine_metrics(v_metrics, min_clusters=_min_clusters):
     """
     This takes the following metrics from the clustering and plot them:
         Silhouette scores
@@ -147,7 +147,7 @@ def examine_metrics(v_metrics):
     v_measures = []
     rand_indices = []
     max_clusters = np.amax(list(v_metrics.keys()))
-    for K in range(2, max_clusters + 1):
+    for K in range(min_clusters, max_clusters + 1):
         # For each number of cluster, get the corresponding metric values
         num_of_clusters.append(K)
         silhouettes.append(v_metrics[K]["silhouette"])
@@ -166,6 +166,8 @@ def examine_metrics(v_metrics):
     plotdf["ARI"] = rand_indices
     plotdf.plot.line()
     plt.title("Metrics for clustering with the number of clusters ranging from 2 to {0}".format(max_clusters))
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Measures')
     plt.show()
     
 #%%
@@ -229,16 +231,18 @@ def plot_diff_features(data):
     plt.show()
 
 # %%
-def examine_inertia(_v_metrics):
+def examine_inertia(_v_metrics, min_clusters=_min_clusters):
     '''
     Function to print out the inertia values for different numbers of clusters
     '''
     
     plotdf = pd.DataFrame()
-    plotdf.index = [i for i in range(2, np.amax(list(_v_metrics.keys())) + 1)]
-    plotdf["Inertia"] = [v_metrics[k]["inertia"] for k in range(2, np.amax(list(_v_metrics.keys())) + 1)]
+    plotdf.index = [i for i in range(min_clusters, np.amax(list(_v_metrics.keys())) + 1)]
+    plotdf["Inertia"] = [v_metrics[k]["inertia"] for k in range(min_clusters, np.amax(list(_v_metrics.keys())) + 1)]
     plotdf.plot.line()
     plt.title("Inertia values corresponding to the number of clusters")
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Inertia')
     plt.show()
 
 # %%
