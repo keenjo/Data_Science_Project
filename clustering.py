@@ -12,6 +12,18 @@ import seaborn as sns
 # Read the preprocessed file into DataFrame
 df = pd.read_json("data/preprocessed_data.json")
 
+#%%
+# Dictionary to show the user options of which feature they could use for clustering
+
+features_dict = {
+    'text': df['processed text'],
+    'description': df['processed description'],
+    'nouns': df['nouns'],
+    'verbs': df['verbs'],
+    'NER tokens': df['NER tokens'],
+    'lemmas': df['lemmas'],
+    'triples': df['processed triples']
+    }
 
 #%%
 # Definition of all parameters neede for functions below
@@ -23,7 +35,8 @@ labels = list(df["category number"])
 _max_features = 32
 
 # Features that you would like to use in the tfidf vectorizer
-corpus = df["processed triples"]
+# Can choose from any of the keys in 'features_dict' above
+corpus = 'triples'
 
 # Minimum number of clusters that you would like to test in the cluster data function
 _min_clusters = 8
@@ -55,6 +68,8 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
                where the key to each dictionary value is the number of clusters
     features: A list containing the all of the features chosen by the tfidf vectorizer
     """
+    corpus = features_dict[corpus]
+    
     # Instantiate a vectoriser
     tfidf = TfidfVectorizer(max_features=max_features, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
     # Fit the vectoriser to the data
@@ -183,6 +198,8 @@ def test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=Tru
       from the 'cluster_data' function
     '''
     
+    corpus = features_dict[corpus]
+    
     total_results = {}
         
         
@@ -303,4 +320,5 @@ examine_metrics(v_metrics)
 
 # Plot how the metrics change with different numbers of tfidf features
 plot_diff_features(df_features)
+
 
