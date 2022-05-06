@@ -13,7 +13,7 @@ import seaborn as sns
 df = pd.read_json("data/preprocessed_data.json")
 
 #%%
-# Dictionary to show the user options of which feature they could use for clustering
+# Dictionary to show the user options of which features they could use for clustering
 
 features_dict = {
     'text': df['processed text'],
@@ -26,7 +26,7 @@ features_dict = {
     }
 
 #%%
-# Definition of all parameters neede for functions below
+# Definition of all parameters needed for functions below
 
 # Lables to evaluate the clustering
 labels = list(df["category number"])
