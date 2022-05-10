@@ -39,10 +39,10 @@ _max_features = 32
 corpus = 'triples'
 
 # Minimum number of clusters that you would like to test in the cluster data function
-_min_clusters = 8
+_min_clusters = 2
 
 # Maximum number of clusters that you would like to test in the cluster data function
-_max_clusters = 30
+_max_clusters = 32
 
 # List containing the different number of tfidf features you'd like to test
 num_features = [10, 30, 50, 70, 90, 100, 150, 200]
@@ -290,22 +290,18 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
     return top_terms
 
 #%%
+'''
+The idea with this testing section below is that you will first test for the ideal number of clusters
+then you will test for the ideal number of features. 
 
-# Cluster the data
-kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters)
-
-# Test data with different numbers of tfidf features
-df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
-
-# Get the top terms for each cluster
-top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
+Then by the end you will know the ideal number of 
+clusters and features to use with your data.
+'''
 
 #%%
 
-# Plot the clusters for one of the kmeans models tested in the cluster_data function
-# The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
-# K must be between _min_clusters and _max_clusters defined a the top of the script
-plot_km_model(kms, matrix, K=16)
+# Cluster the data
+kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters)
 
 #%%
 
@@ -316,6 +312,21 @@ examine_inertia(v_metrics)
 
 # Plot how the metrics change with different numbers of clusters
 examine_metrics(v_metrics)
+
+#%%
+
+# Plot the clusters for one of the kmeans models tested in the cluster_data function
+# The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
+# K must be between _min_clusters and _max_clusters defined a the top of the script
+plot_km_model(kms, matrix, K=16)
+
+#%%
+
+# Test data with different numbers of tfidf features
+df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
+
+# Get the top terms for each cluster (can be printed below if you'd like)
+top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
 
 #%%
 
