@@ -12,6 +12,14 @@ from pprint import pprint
 from SPARQLWrapper import SPARQLWrapper, JSON
 from tqdm import tqdm
 
+# Defintion of all parameters needed to run scraping functions
+
+# Number of articles you would like to collect per category
+_num_results = 100
+
+# Minimum number of sentences you want per article
+_min_sents = 5
+
 # Categories for which we want to retrieve elements that are instances of that category
 general_categories = {
     "Airports"                 : "wd:Q1248784",
@@ -423,9 +431,9 @@ def combine_data(categories, titles, infoboxes, content, descriptions, triples):
 # Testing
 
 nlp = spacy.load('en_core_web_sm')
-articles, wd_items = get_articles(categories, num_results=100)
+articles, wd_items = get_articles(categories, num_results=_num_results)
 titles, infoboxes = get_titles_info(articles)
-content = get_content(titles, min_sents=5)
+content = get_content(titles, min_sents=_min_sents)
 descriptions = get_descriptions(wd_items)
 triples = combine_triples(titles)
 data, group_data, null_data, df = combine_data(categories, titles, infoboxes, content, descriptions, triples)
