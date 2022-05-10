@@ -102,7 +102,7 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
         
         centroids[K] = km.cluster_centers_.argsort()
 
-    return kms, matrix, v_metrics, centroids, features
+    return kms, matrix, v_metrics, centroids, features, max_features
               
 # %%
 def plot_km_model(kms, matrix, K=16):
@@ -180,14 +180,14 @@ def examine_metrics(v_metrics, min_clusters=_min_clusters):
     plotdf["V Measure"] = v_measures
     plotdf["ARI"] = rand_indices
     plotdf.plot.line()
-    plt.title("Metrics for clustering with the number of clusters ranging from 2 to {0}".format(max_clusters))
+    plt.title("Metrics for clustering with the number of clusters ranging from {0} to {1}".format(min_clusters, max_clusters))
     plt.xlabel('Number of clusters')
     plt.ylabel('Measures')
     plt.show()
     
 #%%
 
-def test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=True):
+def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True):
     
     '''
     Function to iterate through multiple numbers of tfidf features
@@ -213,7 +213,7 @@ def test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=Tru
         matrix = tfidf.fit_transform(corpus)
         
         # Instantiate the Kmeans model and fit it to the data
-        km = KMeans(n_clusters=16, max_iter=500, n_init=15, verbose=0)
+        km = KMeans(n_clusters=num_clusters, max_iter=500, n_init=15, verbose=0)
         km.fit(matrix)
         
         # Get the results
@@ -231,11 +231,11 @@ def test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=Tru
     
     df_features = pd.DataFrame.from_dict(total_results, orient='index')
 
-    return df_features
+    return df_features, num_clusters
 
 #%%
 
-def plot_diff_features(data):
+def plot_diff_features(data, num_clusters):
     
     '''
     Function to plot the effect of the number of tfidf features on the clustering evaluation
@@ -244,11 +244,11 @@ def plot_diff_features(data):
     ax = sns.lineplot(data=data)
     ax.set(xlabel='num_features', 
        ylabel='measures', 
-       title='Number of features effect on evaluation metrics')
+       title=f'Effect of number of features on evaluation metrics using {num_clusters} clusters')
     plt.show()
 
 # %%
-def examine_inertia(_v_metrics, min_clusters=_min_clusters):
+def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_features):
     '''
     Function to print out the inertia values for different numbers of clusters
     '''
@@ -257,7 +257,7 @@ def examine_inertia(_v_metrics, min_clusters=_min_clusters):
     plotdf.index = [i for i in range(min_clusters, np.amax(list(_v_metrics.keys())) + 1)]
     plotdf["Inertia"] = [v_metrics[k]["inertia"] for k in range(min_clusters, np.amax(list(_v_metrics.keys())) + 1)]
     plotdf.plot.line()
-    plt.title("Inertia values corresponding to the number of clusters")
+    plt.title(f"Inertia values corresponding to the number of clusters using {_max_features} features")
     plt.xlabel('Number of clusters')
     plt.ylabel('Inertia')
     plt.show()
@@ -295,7 +295,7 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
 kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters)
 
 # Test data with different numbers of tfidf features
-df_features = test_num_features(corpus, labels, num_features, max_clusters=16, use_idf=True)
+df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
 
 # Get the top terms for each cluster
 top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
@@ -304,6 +304,7 @@ top_terms = check_cluster_features(centroids, labels, features, num_clusters=16,
 
 # Plot the clusters for one of the kmeans models tested in the cluster_data function
 # The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
+# K must be between _min_clusters and _max_clusters defined a the top of the script
 plot_km_model(kms, matrix, K=16)
 
 #%%
@@ -319,6 +320,6 @@ examine_metrics(v_metrics)
 #%%
 
 # Plot how the metrics change with different numbers of tfidf features
-plot_diff_features(df_features)
+plot_diff_features(df_features, feature_num_clusters)
 
 
