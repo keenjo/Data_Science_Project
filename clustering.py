@@ -322,11 +322,13 @@ plot_km_model(kms, matrix, K=16)
 
 #%%
 
-# Test data with different numbers of tfidf features
-df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
-
 # Get the top terms for each cluster (can be printed below if you'd like)
 top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
+
+#%%
+
+# Test data with different numbers of tfidf features
+df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
 
 #%%
 
