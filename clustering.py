@@ -7,7 +7,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
 import seaborn as sns
 import os
-from os.path import expanduser
 
 #%%
 
@@ -30,10 +29,8 @@ features_dict = {
 #%%
 # Definition of all parameters needed for functions below
 
-# Defining drectory where graphs will be saved
-home = expanduser("~")
-directory = home+'/clustering_results/'
-os.mkdir(directory)
+# Naming folder where graphs will be saved (slash included)
+folder_name = 'clustering_results/'
 
 # Lables to evaluate the clustering
 labels = list(df["category number"])
@@ -53,6 +50,32 @@ _max_clusters = 32
 
 # List containing the different number of tfidf features you'd like to test
 num_features = [10, 30, 50, 70, 90, 100, 150, 200]
+
+#%%
+def make_directory(folder_name):
+    '''
+    Function to create a directory for the results graphs
+
+    Parameters
+    ----------
+    folder_name: name of a folder as a string (defined at the beginning of the script)
+
+    Returns
+    -------
+    directory: a directory where graphs will be stored
+
+    '''
+    
+    try:
+        directory = folder_name
+        os.mkdir(directory)
+    except FileExistsError:
+        pass
+    
+    return directory
+    
+    
+directory = make_directory(folder_name)
 
 
 # %%
@@ -308,7 +331,7 @@ then you will test for the ideal number of features.
 Then by the end you will know the ideal number of 
 clusters and features to use with your data.
 
-All graphs created here will be saved in a folder called clustering_results in your home directory:
+All graphs created here will be saved in a folder called clustering_results in the same directory that this code is being run from:
     - Inertia graph: inerta_[name of feature used].png
     - Graph of clustering metrics: cluster_metrics_[name of feature used].png
     - Scatterplot of clusters: clustering_[name of feature used]_[number of clusters].png
