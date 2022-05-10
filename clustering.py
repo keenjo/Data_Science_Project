@@ -6,6 +6,8 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
 import seaborn as sns
+import os
+from os.path import expanduser
 
 #%%
 
@@ -27,6 +29,11 @@ features_dict = {
 
 #%%
 # Definition of all parameters needed for functions below
+
+# Defining drectory where graphs will be saved
+home = expanduser("~")
+directory = home+'/clustering_results/'
+os.mkdir(directory)
 
 # Lables to evaluate the clustering
 labels = list(df["category number"])
@@ -102,7 +109,7 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
         
         centroids[K] = km.cluster_centers_.argsort()
 
-    return kms, matrix, v_metrics, centroids, features, max_features
+    return kms, matrix, v_metrics, centroids, features
               
 # %%
 def plot_km_model(kms, matrix, K=16):
@@ -134,8 +141,9 @@ def plot_km_model(kms, matrix, K=16):
                     legend='full',
                     data=tsne_df)
     # Set the plot title and show
-    plt.title("Clustering plot for {0} clusters".format(K))
+    plt.title("Clustering plot for {0} clusters and {1} features".format(K, _max_features))
     plt.show()
+    plt.savefig(directory+f'clustering_{corpus}_{K}.png')
     pass
 
 # %%
@@ -184,6 +192,7 @@ def examine_metrics(v_metrics, min_clusters=_min_clusters):
     plt.xlabel('Number of clusters')
     plt.ylabel('Measures')
     plt.show()
+    plt.savefig(directory+f'cluster_metrics_{corpus}.png')
     
 #%%
 
@@ -246,6 +255,7 @@ def plot_diff_features(data, num_clusters):
        ylabel='measures', 
        title=f'Effect of number of features on evaluation metrics using {num_clusters} clusters')
     plt.show()
+    plt.savefig(directory+f'features_test_{corpus}_{num_clusters}.png')
 
 # %%
 def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_features):
@@ -261,6 +271,7 @@ def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_fe
     plt.xlabel('Number of clusters')
     plt.ylabel('Inertia')
     plt.show()
+    plt.savefig(directory+f'inertia_{corpus}.png')
 
 # %%
 
@@ -296,6 +307,12 @@ then you will test for the ideal number of features.
 
 Then by the end you will know the ideal number of 
 clusters and features to use with your data.
+
+All graphs created here will be saved in a folder called clustering_results in your home directory:
+    - Inertia graph: inerta_[name of feature used].png
+    - Graph of clustering metrics: cluster_metrics_[name of feature used].png
+    - Scatterplot of clusters: clustering_[name of feature used]_[number of clusters].png
+    - Graph of metrics using different numbers of features: features_test_[name of feature used]_[number of clusters].png
 '''
 
 #%%
@@ -317,17 +334,19 @@ examine_metrics(v_metrics)
 
 # Plot the clusters for one of the kmeans models tested in the cluster_data function
 # The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
-# K must be between _min_clusters and _max_clusters defined a the top of the script
+# K must be between _min_clusters and _max_clusters defined a the top of the script 
 plot_km_model(kms, matrix, K=16)
 
 #%%
 
 # Get the top terms for each cluster (can be printed below if you'd like)
+# num_clusters is set to 16 since it performed best for our dataset, but you can choose any value between _min_clusters and _max_clusters
 top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
 
 #%%
 
 # Test data with different numbers of tfidf features
+# num_clusters is set to 16 since it performed best for our dataset, but you can choose whatever value you want
 df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
 
 #%%
