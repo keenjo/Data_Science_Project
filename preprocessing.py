@@ -7,6 +7,9 @@ import string
 
 nlp = spacy.load('en_core_web_sm')
 
+# Define the directory where your scraped data is stored so it can be loaded into a dataframe
+df = pd.read_json('scraped_data.json')
+
 # Add tqdm support to pandas by creating the `DataFrame.progress_apply()` method
 tqdm.pandas(desc='Pre-processing article content and descriptions')
 
@@ -19,9 +22,14 @@ tqdm.pandas(desc='Pre-processing article content and descriptions')
 def preprocess(text):
     '''
     Processes a text by tokenizing it and removing stop words and punctuation from the output.
-    Arguments:
-        `text` The input text string.
-    Returns a list of tokens of `text`, without punctuation or stopwords.
+    
+    Parameters
+    ----------
+    text: the input text string
+
+    Returns
+    -------
+    tokens: a list of tokens from `text`, without punctuation or stopwords
     '''
     
     if text is None:
@@ -66,26 +74,47 @@ def pos(tokens):
 
 
 def nouns(tokens):
-    # Function to only extract noun POS tokens from text
-    pos = []
+    '''
+    Function to extract noun POS tokens from text
+    
+    Parameters
+    ----------
+    tokens: a list of tokens
+
+    Returns
+    -------
+    noun_list: a list of nouns
+    '''
+
+    noun_list = []
     
     for token in tokens:
         if token[0] == 'NOUN':
-            pos.append(token[1])
+            noun_list.append(token[1])
             
-    return pos
+    return noun_list
 
 
 def verbs(tokens):
-    # Function to only extract verb POS tokens from text
+    '''
+    Function to extract verb POS tokens from text
     
-    pos = []
+    Parameters
+    ----------
+    tokens: a list of tokens
+
+    Returns
+    -------
+    verb_list: a list of verbs
+    '''
+    
+    verb_list = []
     
     for token in tokens:
         if token[0] == 'VERB':
-            pos.append(token[1])
+            verb_list.append(token[1])
             
-    return pos
+    return verb_list
   
         
 def ner(text):
@@ -115,7 +144,19 @@ def ner(text):
 
 
 def ner_tokens(tokens):
-    # Function to only extract the NER tokens without their labels
+    '''
+    Function to only extract NER tokens without their labels
+
+    Parameters
+    ----------
+    tokens: a list of tokens
+
+    Returns
+    -------
+    ner: a list of NER tokens
+
+    '''
+
     ner = []
     
     for word in tokens:
@@ -156,7 +197,7 @@ def drop_null(df, drop_description=False):
 
     Returns
     -------
-    df : processed dataframe
+    df: processed dataframe
 
     '''
         
@@ -182,6 +223,17 @@ def drop_null(df, drop_description=False):
 
 
 def process_triples(triples):
+    '''
+    Function to process each triple into a string rather than a list
+    
+    Parameters
+    ----------
+    triples : a list of lists in which each inner list is a group of triples
+
+    Returns
+    -------
+    new_triples : a list of triples where each triple is a string
+    '''
     
     new_triples = []
    
@@ -192,7 +244,7 @@ def process_triples(triples):
     return new_triples
 
 
-df = pd.read_json('scraped_data.json')
+
 
 df = drop_null(df, drop_description=False)
 
