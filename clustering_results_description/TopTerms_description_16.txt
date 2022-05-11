@@ -1,0 +1,34 @@
+Top terms for 16 clusters
+
+Cluster 1: ['character', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
+Cluster 2: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
+Cluster 3: ['character', 'team', 'spoken', 'serving', 'politician', 'locomotives', 'language', 'dish', 'company', 'class']
+
+Cluster 4: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
+Cluster 5: ['American', 'team', 'serving', 'rugby', 'politician', 'player', 'locomotives', 'human', 'fictional', 'dish']
+
+Cluster 6: ['character', 'team', 'spoken', 'serving', 'rugby', 'people', 'locomotives', 'language', 'human', 'fictional']
+
+Cluster 7: ['American', 'team', 'spoken', 'serving', 'politician', 'people', 'locomotives', 'language', 'human', 'fictional']
+
+Cluster 8: ['university', 'player', 'people', 'locomotives', 'language', 'human', 'serving', 'dish', 'company', 'class']
+
+Cluster 9: ['character', 'team', 'spoken', 'serving', 'rugby', 'player', 'people', 'locomotives', 'language', 'fictional']
+
+Cluster 10: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
+Cluster 11: ['character', 'politician', 'player', 'people', 'locomotives', 'language', 'human', 'fictional', 'dish', 'company']
+
+Cluster 12: ['character', 'spoken', 'serving', 'politician', 'player', 'people', 'locomotives', 'language', 'human', 'fictional']
+
+Cluster 13: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'language', 'human']
+
+Cluster 14: ['character', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
+Cluster 15: ['American', 'team', 'spoken', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language', 'human']
+
+Cluster 16: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+
