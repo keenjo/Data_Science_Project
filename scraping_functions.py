@@ -66,8 +66,7 @@ def make_directory(folder_name):
     except FileExistsError:
         pass
     
-    return directory
-
+    
 # All categories
 categories = sorted(list(general_categories.keys()) + list(occupation_categories.keys()) + multi_categories)
 
