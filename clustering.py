@@ -28,8 +28,15 @@ features_dict = {
     }
 
 #%%
-# Definition of all parameters needed for functions below
-
+# Definition of all parameters needed for functions in the script
+'''
+All graphs/files created here will be saved in a folder called clustering_results_[name of feature used] in the same directory that this code is being run from:
+    - Inertia graph: Inerta_[name of feature used].png
+    - Graph of clustering metrics: ClusterMetrics_[name of feature used].png
+    - Scatterplot of clusters: ClusterScatterplot_[name of feature used]_[number of clusters].png
+    - Graph of metrics using different numbers of features: FeaturesTesting_[name of feature used]_[number of clusters].png
+    - Top terms: TopTerms_[name of features used]_[number of clusters].txt
+'''
 # ---------- TESTING ----------
 # These parameters below are needed for testing many numbers of clusters and features
 
@@ -74,14 +81,18 @@ else:
 
 
 # ---------- FOR VIZUALIZING BEST RESULTS ----------
-# These parameters below should be adjusted after this script has been run at least once
-# so you can vizualize your clustering to find the best performing number of clusters and features
-# Adjusting these two varibales is crucial for getting the best clustering scatterplot
+'''
+These parameters below should especially be adjusted after this script has been run at least once
+so you can vizualize your clustering to find the best performing number of clusters and features.
+
+Adjusting these two varibales is crucial for getting the best scatterplot of your clusters.
+'''
 
 # Number of tfidf features that you want to use when testing clustering
 _max_features = 32
 
-# Ideal number of clusters/best number of clusters according to testing
+# Best number of clusters according to testing
+# Must be between _min_clusters and _max_clusters
 best_clusters = 16
 
 #%%
@@ -433,21 +444,6 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
                 f.write('\n\n')
                 
 #%%
-'''
-The idea with this testing section below is that you will first test for the ideal number of clusters
-then you will test for the ideal number of features. 
-
-Then by the end you will know the ideal number of 
-clusters and features to use with your data.
-
-All graphs/files created here will be saved in a folder called clustering_results in the same directory that this code is being run from:
-    - Inertia graph: Inerta_[name of feature used].png
-    - Graph of clustering metrics: ClusterMetrics_[name of feature used].png
-    - Scatterplot of clusters: ClusterScatterplot_[name of feature used]_[number of clusters].png
-    - Graph of metrics using different numbers of features: FeaturesTesting_[name of feature used]_[number of clusters].png
-    - Top terms: TopTerms_[name of features used]_[number of clusters].txt
-'''
-#%%
 
 # Make directory to store graphs
 make_directory(folder_name)
@@ -470,20 +466,16 @@ examine_metrics(v_metrics)
 #%%
 
 # Plot the clusters for one of the kmeans models tested in the cluster_data function
-# The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
-# ** K must be between _min_clusters and _max_clusters defined a the top of the script **
 plot_km_model(kms, matrix, K=best_clusters)
 
 #%%
 
 # Get the top terms for each cluster
-# num_clusters is set to 16 since it performed best for our dataset, but you can choose any value between _min_clusters and _max_clusters
 check_cluster_features(centroids, labels, features, num_clusters=best_clusters, num_features=num_top_terms)
 
 #%%
 
 # Test data with different numbers of tfidf features
-# num_clusters is set to 16 since it performed best for our dataset, but you can choose whatever value you want
 df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=best_clusters, use_idf=True, hstack=hstack)
 
 #%%
