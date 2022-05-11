@@ -1,0 +1,34 @@
+Top terms for 16 clusters
+
+Cluster 1: ['apparent magnitude (P1215) unit 1', 'city', 'character', 'cemetery', 'building', 'astronaut', 'artist', 'airport', 'Russian', 'class']
+
+Cluster 2: ['apparent magnitude (P1215) unit 1', 'football', 'human', 'international', 'language', 'locomotives', 'people', 'town', 'player', 'politician']
+
+Cluster 3: ['apparent magnitude (P1215) unit 1', 'cemetery', 'building', 'astronaut', 'artist', 'airport', 'United', 'States', 'South', 'Marvel']
+
+Cluster 4: ['apparent magnitude (P1215) unit 1', 'astronaut', 'artist', 'airport', 'Russian', 'Republic', 'Oblast', 'Marvel', 'Leningrad', 'building']
+
+Cluster 5: ['apparent magnitude (P1215) unit 1', 'building', 'astronaut', 'artist', 'Russian', 'Russia', 'Republic', 'Oblast', 'Marvel', 'Leningrad']
+
+Cluster 6: ['apparent magnitude (P1215) unit 1', 'building', 'artist', 'airport', 'Russia', 'Oblast', 'Marvel', 'Leningrad', 'cemetery', 'Indonesian']
+
+Cluster 7: ['apparent magnitude (P1215) unit 1', 'cemetery', 'building', 'astronaut', 'artist', 'airport', 'Oblast', 'Marvel', 'Leningrad', 'character']
+
+Cluster 8: ['university', 'football', 'international', 'language', 'player', 'politician', 'president', 'dolmen', 'rugby', 'settlement']
+
+Cluster 9: ['apparent magnitude (P1215) unit 1', 'city', 'character', 'cemetery', 'building', 'astronaut', 'airport', 'United', 'States', 'class']
+
+Cluster 10: ['apparent magnitude (P1215) unit 1', 'town', 'electric', 'fictional', 'football', 'human', 'international', 'language', 'locomotives', 'dolmen']
+
+Cluster 11: ['apparent magnitude (P1215) unit 1', 'cemetery', 'building', 'astronaut', 'airport', 'United', 'States', 'South', 'Russian', 'city']
+
+Cluster 12: ['apparent magnitude (P1215) unit 1', 'astronaut', 'artist', 'airport', 'United', 'States', 'South', 'Russia', 'Republic', 'Oblast']
+
+Cluster 13: ['apparent magnitude (P1215) unit 1', 'building', 'astronaut', 'artist', 'airport', 'South', 'Russian', 'Russia', 'Republic', 'Oblast']
+
+Cluster 14: ['apparent magnitude (P1215) unit 1', 'dolmen', 'electric', 'fictional', 'football', 'human', 'language', 'locomotives', 'people', 'dish']
+
+Cluster 15: ['apparent magnitude (P1215) unit 1', 'building', 'astronaut', 'artist', 'airport', 'United', 'States', 'South', 'Russian', 'Marvel']
+
+Cluster 16: ['apparent magnitude (P1215) unit 1', 'character', 'cemetery', 'building', 'artist', 'airport', 'South', 'Russia', 'Republic', 'city']
+
