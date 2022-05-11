@@ -1,34 +1,34 @@
 Top terms for 16 clusters
 
-Cluster 1: ['father', 'Lady', 'Kennedy', 'stories', 'Johnson', 'star', 'voiced', 'vowel', 'brown', 'Harley']
+Cluster 1: ['№', 'aquino', 'committee', 'cup', 'economic', 'seminary', 'schools', 'runway', 'rugby', 'rizal']
 
-Cluster 2: ['№', 'Doom', 'vowel', 'economic', 'locomotives', 'Harley', 'railway', 'trains', 'Magneto', 'Mao']
+Cluster 2: ['№', 'oil', 'comics', 'comic', 'passenger', 'passengers', 'philippines', 'pilot', 'powers', 'presidential']
 
-Cluster 3: ['№', 'Mickey', 'Magneto', 'Mao', 'Harley', 'appears', 'Woman', 'Doctor', 'Terminal', 'Marcos']
+Cluster 3: ['№', 'municipal', 'cup', 'crew', 'nasa', 'nixon', 'oblast', 'control', 'oil', 'operations']
 
-Cluster 4: ['№', 'Comics', 'railway', 'Disney', 'passengers', 'Doom', 'Eisenhower', 'locomotives', 'flights', 'engine']
+Cluster 4: ['№', 'doom', 'soviet', 'spider', 'cup', 'superman', 'comics', 'shuttle', 'comic', 'championship']
 
-Cluster 5: ['№', 'NASA', 'Municipal', 'Mickey', 'Marcos', 'Mao', 'Magneto', 'Lady', 'Kennedy', 'Nixon']
+Cluster 5: ['league', 'vowels', 'vowel', 'voiced', 'harley', 'comic', 'programs', 'race', 'reagan', 'bush']
 
-Cluster 6: ['Academy', 'Washington', 'Woman', 'X', 'administrative', 'aircraft', 'artist', 'battle', 'best', 'Universe']
+Cluster 6: ['able', 'population', 'popular', 'political', 'policy', 'point', 'plan', 'placed', 'place', 'pilot']
 
-Cluster 7: ['Academy', 'million', 'military', 'men', 'members', 'member', 'media', 'man', 'making', 'major']
+Cluster 7: ['stories', 'universe', 'congress', 'u.s.', 'lois', 'marcos', 'comics', 'comic', 'marvel', 'mary']
 
-Cluster 8: ['области', 'и', 'г', 'в', '№', '«', '»', 'campus', 'Municipal', 'runway']
+Cluster 8: ['№', 'locomotives', 'mickey', 'railway', 'rizal', 'languages', 'scrooge', 'marvel', 'batman', 'economic']
 
-Cluster 9: ['Academy', 'member', 'media', 'means', 'man', 'making', 'main', 'low', 'long', 'locomotives']
+Cluster 9: ['batman', 'astronaut', 'lois', 'harley', 'runway', 'superman', 'г', '№', 'marvel', 'aquino']
 
-Cluster 10: ['№', 'Party', 'Order', 'locomotives', 'Oblast', 'military', 'Nixon', 'oil', 'NASA', 'Museum']
+Cluster 10: ['№', 'harley', 'scrooge', 'seminary', 'shuttle', 'forces', 'faculty', 'spider', 'spoken', 'station']
 
-Cluster 11: ['Terminal', 'Superman', 'Cup', 'Spider', 'Scrooge', 'Rizal', 'Oblast', 'Doom', 'Nixon', 'Mickey']
+Cluster 11: ['№', 'faculty', 'father', 'flight', 'universe', 'game', 'title', 'rugby', 'head', 'house']
 
-Cluster 12: ['Education', 'Woman', 'artist', 'career', 'character', 'children', 'comic', 'Universe', 'education', 'Magneto']
+Cluster 12: ['№', 'spoken', 'cemetery', 'mickey', 'speed', 'superman', 'oblast', 'marcos', 'scrooge', 'lois']
 
-Cluster 13: ['father', 'comic', 'construction', 'control', 'designed', 'discovered', 'economic', 'education', 'election', 'energy']
+Cluster 13: ['№', 'spider', 'mickey', 'batman', 'superman', 'doom', 'vowels', 'lois', 'locomotives', 'vowel']
 
-Cluster 14: ['father', 'important', 'human', 'house', 'home', 'help', 'held', 'head', 'international', 'ground']
+Cluster 14: ['line', 'law', 'leader', 'library', 'locomotives', 'lois', 'marcos', 'marvel', 'mickey', 'minister']
 
-Cluster 15: ['father', 'Reagan', 'Order', 'Nixon', 'NASA', 'Mickey', 'Men', 'Marvel', 'Marcos', 'Rizal']
+Cluster 15: ['scrooge', 'batman', 'spider', 'harley', 'shuttle', 'oblast', 'bush', 'rugby', 'rizal', 'locomotives']
 
-Cluster 16: ['Scrooge', 'Doom', 'Eisenhower', 'Comics', 'locomotives', 'Harley', 'Kennedy', 'Lois', 'Magneto', 'Batman']
+Cluster 16: ['№', 'state', 'library', 'level', 'left', 'led', 'league', 'leading', 'leader', 'lincoln']
 

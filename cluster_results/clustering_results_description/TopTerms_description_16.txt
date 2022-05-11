@@ -1,34 +1,34 @@
 Top terms for 16 clusters
 
-Cluster 1: ['character', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 1: ['airport', 'town', 'team', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'oblast', 'locomotives']
 
-Cluster 2: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 2: ['german', 'team', 'spoken', 'russia', 'rugby', 'politician', 'player', 'oblast', 'locomotives', 'language']
 
-Cluster 3: ['character', 'team', 'spoken', 'serving', 'politician', 'locomotives', 'language', 'dish', 'company', 'class']
+Cluster 3: ['airport', 'team', 'serving', 'rugby', 'politician', 'player', 'oblast', 'locomotives', 'international', 'human']
 
-Cluster 4: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 4: ['airport', 'town', 'team', 'spoken', 'serving', 'russia', 'rugby', 'player', 'oblast', 'locomotives']
 
-Cluster 5: ['American', 'team', 'serving', 'rugby', 'politician', 'player', 'locomotives', 'human', 'fictional', 'dish']
+Cluster 5: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 
-Cluster 6: ['character', 'team', 'spoken', 'serving', 'rugby', 'people', 'locomotives', 'language', 'human', 'fictional']
+Cluster 6: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'politician', 'oblast', 'locomotives']
 
-Cluster 7: ['American', 'team', 'spoken', 'serving', 'politician', 'people', 'locomotives', 'language', 'human', 'fictional']
+Cluster 7: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 
-Cluster 8: ['university', 'player', 'people', 'locomotives', 'language', 'human', 'serving', 'dish', 'company', 'class']
+Cluster 8: ['airport', 'team', 'states', 'spoken', 'serving', 'rugby', 'politician', 'player', 'locomotives', 'language']
 
-Cluster 9: ['character', 'team', 'spoken', 'serving', 'rugby', 'player', 'people', 'locomotives', 'language', 'fictional']
+Cluster 9: ['airport', 'town', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'oblast', 'locomotives']
 
-Cluster 10: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 10: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 
-Cluster 11: ['character', 'politician', 'player', 'people', 'locomotives', 'language', 'human', 'fictional', 'dish', 'company']
+Cluster 11: ['airport', 'town', 'team', 'spoken', 'serving', 'russia', 'rugby', 'oblast', 'locomotives', 'language']
 
-Cluster 12: ['character', 'spoken', 'serving', 'politician', 'player', 'people', 'locomotives', 'language', 'human', 'fictional']
+Cluster 12: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 
-Cluster 13: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'language', 'human']
+Cluster 13: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 
-Cluster 14: ['character', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 14: ['airport', 'town', 'spoken', 'serving', 'russia', 'politician', 'player', 'oblast', 'locomotives', 'language']
 
-Cluster 15: ['American', 'team', 'spoken', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language', 'human']
+Cluster 15: ['airport', 'town', 'team', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player', 'oblast']
 
-Cluster 16: ['American', 'team', 'spoken', 'serving', 'rugby', 'politician', 'player', 'people', 'locomotives', 'language']
+Cluster 16: ['airport', 'town', 'team', 'states', 'spoken', 'serving', 'russia', 'rugby', 'politician', 'player']
 

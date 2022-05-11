@@ -1,34 +1,34 @@
 Top terms for 16 clusters
 
-Cluster 1: ['Air', 'move', 'new', 'number', 'offer', 'official', 'old', 'open', 'operate', 'order']
+Cluster 1: ['election', 'batman', 'earth', 'student', 'kill', 'superman', 'education', 'science', 'church', 'star']
 
-Cluster 2: ['NASA', 'vowel', 'defeat', 'locomotive', 'child', 'character', 'woman', 'Superman', 'Batman', 'language']
+Cluster 2: ['language', 'batman', 'word', 'education', 'character', 'woman', 'superman', 'child', 'science', 'speak']
 
-Cluster 3: ['Batman', 'vowel', 'Superman', 'election', 'voice', 'university', 'locomotive', 'defeat', 'Man', 'School']
+Cluster 3: ['superman', 'batman', 'student', 'star', 'campus', 'character', 'class', 'u.s.', 'father', 'french']
 
-Cluster 4: ['locomotive', 'Superman', 'Batman', 'defeat', 'vowel', 'passenger', 'terminal', 'building', 'language', 'century']
+Cluster 4: ['batman', 'education', 'mission', 'station', 'passenger', 'terminal', 'army', 'election', 'aircraft', 'political']
 
-Cluster 5: ['Air', 'Superman', 'aircraft', 'airport', 'Earth', 'transport', 'Batman', 'election', 'locomotive', 'NASA']
+Cluster 5: ['superman', 'batman', 'flight', 'passenger', 'aircraft', 'terminal', 'transport', 'character', 'appear', 'election']
 
-Cluster 6: ['Air', 'airport', 'attempt', 'call', 'century', 'character', 'continue', 'control', 'create', 'election']
+Cluster 6: ['superman', 'batman', 'terminal', 'earth', 'campus', 'passenger', 'season', 'story', 'art', 'airport']
 
-Cluster 7: ['locomotive', 'Batman', 'vowel', 'Superman', 'terminal', 'Earth', 'airport', 'Airport', 'passenger', 'NASA']
+Cluster 7: ['aircraft', 'election', 'campus', 'superman', 'transport', 'batman', 'battle', 'design', 'operate', 'flight']
 
-Cluster 8: ['kill', 'election', 'government', 'Space', 'locomotive', 'mission', 'passenger', 'aircraft', 'Man', 'station']
+Cluster 8: ['aircraft', 'batman', 'superman', 'flight', 'u.s.', 'black', 'mission', 'college', 'publish', 'battle']
 
-Cluster 9: ['president', 'NASA', 'publish', 'Man', 'father', 'defeat', 'President', 'story', 'law', 'mission']
+Cluster 9: ['batman', 'terminal', 'campus', 'superman', 'election', 'airport', 'transport', 'passenger', 'u.s.', 'army']
 
-Cluster 10: ['Air', 'character', 'mission', 'U.S.', 'Superman', 'Space', 'NASA', 'Man', 'voice', 'student']
+Cluster 10: ['campus', 'airport', 'political', 'district', 'terminal', 'passenger', 'election', 'education', 'national', 'university']
 
-Cluster 11: ['vowel', 'Batman', 'transport', 'terminal', 'NASA', 'Superman', 'locomotive', 'Airport', 'airport', 'election']
+Cluster 11: ['aircraft', 'airport', 'superman', 'batman', 'club', 'election', 'terminal', 'party', 'season', 'flight']
 
-Cluster 12: ['vowel', 'Batman', 'Superman', 'flight', 'passenger', 'terminal', 'aircraft', 'airport', 'transport', 'Man']
+Cluster 12: ['superman', 'election', 'battle', 'batman', 'team', 'flight', 'campus', 'father', 'character', 'story']
 
-Cluster 13: ['Air', 'Man', 'Superman', 'U.S.', 'aircraft', 'airport', 'Space', 'locomotive', 'president', 'train']
+Cluster 13: ['science', 'control', 'research', 'kill', 'church', 'language', 'character', 'power', 'speak', 'earth']
 
-Cluster 14: ['NASA', 'vowel', 'Airport', 'airport', 'locomotive', 'university', 'terminal', 'College', 'political', 'election']
+Cluster 14: ['batman', 'superman', 'campus', 'election', 'airport', 'college', 'passenger', 'mission', 'program', 'character']
 
-Cluster 15: ['Air', 'student', 'Space', 'Superman', 'election', 'run', 'aircraft', 'public', 'president', 'announce']
+Cluster 15: ['terminal', 'batman', 'superman', 'passenger', 'church', 'campus', 'century', 'building', 'character', 'locate']
 
-Cluster 16: ['voice', 'NASA', 'Superman', 'Man', 'passenger', 'locomotive', 'aircraft', 'airport', 'Space', 'College']
+Cluster 16: ['air', 'russian', 'french', 'school', 'flight', 'season', 'film', 'series', 'serve', 'father']
 
