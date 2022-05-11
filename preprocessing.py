@@ -16,7 +16,7 @@ tqdm.pandas(desc='Pre-processing article content and descriptions')
 
 def make_directory(folder_name):
     '''
-    Function to create a directory for the results graphs
+    Function to create a directory for the data (in case it doesn't already exist)
     Parameters
     ----------
     folder_name: name of a folder as a string (defined at the beginning of the script)
@@ -31,8 +31,6 @@ def make_directory(folder_name):
     except FileExistsError:
         pass
     
-    return directory
-
 
 def preprocess(text):
     '''
