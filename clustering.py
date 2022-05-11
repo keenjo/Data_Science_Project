@@ -6,6 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
 import seaborn as sns
+import scipy
 import os
 
 #%%
@@ -28,9 +29,18 @@ features_dict = {
 
 #%%
 # Definition of all parameters needed for functions below
-
-# Naming folder where graphs will be saved (slash included)
-folder_name = 'clustering_results/'
+'''
+There is one parameter that must be defined at the bottom of the script for the following functions:
+    - plot_km_model
+    - check_cluster_features
+    - test_num_features
+    
+These three functions only look at one number of clusters at a time and the idea of this script is
+that you will be able to find the ideal number of clusters for your data via the first few clustering
+functions. Then these three functions mentioned above will allow you to see the scatterplot
+for your ideal number of clusters and test the idea number of tfidf features to go along with
+your ideal number of clusters.
+'''
 
 # Lables to evaluate the clustering
 labels = list(df["category number"])
@@ -42,6 +52,15 @@ _max_features = 32
 # Can choose from any of the keys in 'features_dict' above
 corpus = 'triples'
 
+# If you want to use multiple features in tfidf you can enter them into a list below
+# Ex: ['triples', 'lemmas', 'description']
+stacked_corpus = None
+
+if stacked_corpus != None:
+    hstack = True
+else:
+    hstack = False
+
 # Minimum number of clusters that you would like to test in the cluster data function
 _min_clusters = 2
 
@@ -49,7 +68,18 @@ _min_clusters = 2
 _max_clusters = 32
 
 # List containing the different number of tfidf features you'd like to test
-num_features = [10, 30, 50, 70, 90, 100, 150, 200]
+num_features = [10, 30, 50, 70, 90, 100, 150, 200, 500]
+
+# Number of top terms you would like to see per cluster
+num_top_terms = 10
+
+# Naming folder where graphs will be saved (include slash)
+# May want to change the firectory name if running the script multiple times
+# so older data does not get overwritten
+if hstack == False:
+    folder_name = f'clustering_results_{corpus}/'
+else:
+    folder_name = f'clustering_results_{str(stacked_corpus)}/'
 
 #%%
 def make_directory(folder_name):
@@ -73,13 +103,11 @@ def make_directory(folder_name):
         pass
     
     return directory
-    
-    
+
 directory = make_directory(folder_name)
-
-
+    
 # %%
-def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=16, use_idf=True):
+def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=16, use_idf=True, hstack=False):
     """
     The function to cluster the feature
     Args:
@@ -98,12 +126,35 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
                where the key to each dictionary value is the number of clusters
     features: A list containing the all of the features chosen by the tfidf vectorizer
     """
-    corpus = features_dict[corpus]
+    if hstack == False:
+        corpus = features_dict[corpus]
+        
+        # Instantiate a vectoriser
+        tfidf = TfidfVectorizer(max_features=max_features, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+        # Fit the vectoriser to the data
+        matrix = tfidf.fit_transform(corpus)
+        
+        features = tfidf.get_feature_names_out()
     
-    # Instantiate a vectoriser
-    tfidf = TfidfVectorizer(max_features=max_features, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
-    # Fit the vectoriser to the data
-    matrix = tfidf.fit_transform(corpus)
+    else: # If you have decided to test multiple features at once
+        
+        corpus = [features_dict[feature] for feature in stacked_corpus]
+        
+        tfidf_stack = []
+        features = []
+        
+        for feature in corpus:
+        
+            tfidf = TfidfVectorizer(max_features=round(max_features/len(corpus)), use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+            part_matrix = tfidf.fit_transform(feature)
+            tfidf_stack.append(part_matrix)
+            
+            part_features = tfidf.get_feature_names_out()
+            
+            for feature in part_features:
+                features.append(feature)
+            
+        matrix = scipy.sparse.hstack(tfidf_stack)
 
     kms = dict()  # A list to store models
     v_metrics = dict()  # A dictionary to store metrics
@@ -111,12 +162,12 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
 
     print("Clustering the data using {0} features".format(max_features))
     
-    features = tfidf.get_feature_names_out()
-    #print("Feature names", tfidf.get_feature_names())
+    
+
     for K in range(min_clusters, max_clusters + 1):
         print("Current number of clusters: {0}/{1}".format(K, max_clusters))
         # Instantiate the Kmeans model and fit it to the data
-        km = KMeans(n_clusters=K, max_iter=500, n_init=15, verbose=0)
+        km = KMeans(n_clusters=K, max_iter=500, n_init=15, verbose=0, random_state=10)
         km.fit(matrix)
         # Get the results
         kms[K] = km  # Model
@@ -135,7 +186,7 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
     return kms, matrix, v_metrics, centroids, features
               
 # %%
-def plot_km_model(kms, matrix, K=16):
+def plot_km_model(kms, matrix, directory=directory, K=16):
     """
     Plot the results of the selected KMeans model
 
@@ -165,13 +216,16 @@ def plot_km_model(kms, matrix, K=16):
                     data=tsne_df)
     # Set the plot title and show
     plt.title("Clustering plot for {0} clusters and {1} features".format(K, _max_features))
-    plt.show()
-    plt.savefig(directory+f'clustering_{corpus}_{K}.png')
+    
+    if hstack == False:
+        plt.savefig(directory+f'ClusterScatterplot_{corpus}_{K}.png')
+    else:
+        plt.savefig(directory+f'ClusterScatterplot_stack_{K}.png')
     pass
 
 # %%
 # Examine the metrics
-def examine_metrics(v_metrics, min_clusters=_min_clusters):
+def examine_metrics(v_metrics, min_clusters=_min_clusters, directory=directory):
     """
     This takes the following metrics from the clustering and plot them:
         Silhouette scores
@@ -203,6 +257,10 @@ def examine_metrics(v_metrics, min_clusters=_min_clusters):
         rand_indices.append(v_metrics[K]["rand_index"])
 
     # Start plotting
+    
+    # Declare the figure
+    plt.figure(figsize=[12, 8])
+    
     plotdf = pd.DataFrame()
     plotdf.index = num_of_clusters
     plotdf["Silhouette"] = silhouettes
@@ -214,12 +272,15 @@ def examine_metrics(v_metrics, min_clusters=_min_clusters):
     plt.title("Metrics for clustering with the number of clusters ranging from {0} to {1}".format(min_clusters, max_clusters))
     plt.xlabel('Number of clusters')
     plt.ylabel('Measures')
-    plt.show()
-    plt.savefig(directory+f'cluster_metrics_{corpus}.png')
     
+    if hstack == False:
+        plt.savefig(directory+f'ClusterMetrics_{corpus}.png')
+    else:
+        plt.savefig(directory+f'ClusterMetrics_stack.png')
+        
 #%%
 
-def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True):
+def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True, hstack=False):
     
     '''
     Function to iterate through multiple numbers of tfidf features
@@ -229,23 +290,42 @@ def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=Tru
     - default is 16, but user is encouraged to enter the value that gets the best result
       from the 'cluster_data' function
     '''
-    
-    corpus = features_dict[corpus]
-    
+        
     total_results = {}
         
+    if hstack == False:
+        corpus = features_dict[corpus]
+    else:
+        corpus = [features_dict[feature] for feature in stacked_corpus]
         
     for num in num_features:
         
-        print(f'Testing {num} tfidf features')
+        print(f'Testing {num} tfidf features on {num_clusters} clusters')
         
+        if hstack == False:
+            # Instantiate a vectoriser
+            tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+            # Fit the vectoriser to the data
+            matrix = tfidf.fit_transform(corpus)
+    
+        else: # If you have decided to 
+            tfidf_stack = []
+        
+            for feature in corpus:
+        
+                tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+                part_matrix = tfidf.fit_transform(feature)
+                tfidf_stack.append(part_matrix)
+            
+            matrix = scipy.sparse.hstack(tfidf_stack)
+            
         # Instantiate a vectoriser
-        tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+        #tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
         # Fit the vectoriser to the data
-        matrix = tfidf.fit_transform(corpus)
+        #matrix = tfidf.fit_transform(corpus)
         
         # Instantiate the Kmeans model and fit it to the data
-        km = KMeans(n_clusters=num_clusters, max_iter=500, n_init=15, verbose=0)
+        km = KMeans(n_clusters=num_clusters, max_iter=500, n_init=15, verbose=0, random_state=10)
         km.fit(matrix)
         
         # Get the results
@@ -267,24 +347,33 @@ def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=Tru
 
 #%%
 
-def plot_diff_features(data, num_clusters):
+def plot_diff_features(data, num_clusters ,directory=directory):
     
     '''
     Function to plot the effect of the number of tfidf features on the clustering evaluation
     '''
     
+    # Declare the figure
+    plt.figure(figsize=[12, 8])
+    
     ax = sns.lineplot(data=data)
     ax.set(xlabel='num_features', 
        ylabel='measures', 
        title=f'Effect of number of features on evaluation metrics using {num_clusters} clusters')
-    plt.show()
-    plt.savefig(directory+f'features_test_{corpus}_{num_clusters}.png')
+    
+    if hstack==False:
+        plt.savefig(directory+f'FeaturesTesting_{corpus}_{num_clusters}.png')
+    else:
+        plt.savefig(directory+f'FeaturesTesting_stack_{num_clusters}.png')
 
 # %%
-def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_features):
+def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_features, directory=directory):
     '''
     Function to print out the inertia values for different numbers of clusters
     '''
+    
+    # Declare the figure
+    plt.figure(figsize=[12, 8])
     
     plotdf = pd.DataFrame()
     plotdf.index = [i for i in range(min_clusters, np.amax(list(_v_metrics.keys())) + 1)]
@@ -293,8 +382,11 @@ def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_fe
     plt.title(f"Inertia values corresponding to the number of clusters using {_max_features} features")
     plt.xlabel('Number of clusters')
     plt.ylabel('Inertia')
-    plt.show()
-    plt.savefig(directory+f'inertia_{corpus}.png')
+    
+    if hstack == False:
+        plt.savefig(directory+f'Inertia_{corpus}.png')
+    else:
+        plt.savefig(directory+'Inertia_stack.png')
 
 # %%
 
@@ -315,14 +407,28 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
     # For each item in the labels
     for x in range(true_k):
         clust_terms = []
-        # Get the top 50 terms from each cluster centroid
+        # Get the top x terms from each cluster centroid
         for centroid in centroids[num_clusters][x, :num_features]:
             clust_terms.append(features[centroid]) # features output from cluster_data function
             
         top_terms[x+1] = clust_terms
     
-    return top_terms
-
+    if hstack == False:
+        with open(directory+f'TopTerms_{corpus}_{num_clusters}.txt', 'w') as f:
+            f.write(f'Top terms for {num_clusters} clusters\n\n')
+        
+            for key in top_terms:
+                f.write(f'Cluster {key}: {top_terms[key]}')
+                f.write('\n\n')
+                
+    else:
+        with open(directory+f'TopTerms_stack_{num_clusters}.txt', 'w') as f:
+            f.write(f'Top terms for {num_clusters} clusters\n\n')
+        
+            for key in top_terms:
+                f.write(f'Cluster {key}: {top_terms[key]}')
+                f.write('\n\n')
+                
 #%%
 '''
 The idea with this testing section below is that you will first test for the ideal number of clusters
@@ -331,17 +437,22 @@ then you will test for the ideal number of features.
 Then by the end you will know the ideal number of 
 clusters and features to use with your data.
 
-All graphs created here will be saved in a folder called clustering_results in the same directory that this code is being run from:
-    - Inertia graph: inerta_[name of feature used].png
-    - Graph of clustering metrics: cluster_metrics_[name of feature used].png
-    - Scatterplot of clusters: clustering_[name of feature used]_[number of clusters].png
-    - Graph of metrics using different numbers of features: features_test_[name of feature used]_[number of clusters].png
+All graphs/files created here will be saved in a folder called clustering_results in the same directory that this code is being run from:
+    - Inertia graph: Inerta_[name of feature used].png
+    - Graph of clustering metrics: ClusterMetrics_[name of feature used].png
+    - Scatterplot of clusters: ClusterScatterplot_[name of feature used]_[number of clusters].png
+    - Graph of metrics using different numbers of features: FeaturesTesting_[name of feature used]_[number of clusters].png
+    - Top terms: TopTerms_[name of features used]_[number of clusters].txt
 '''
+#%%
+
+# Make directory to store graphs
+make_directory(folder_name)
 
 #%%
 
 # Cluster the data
-kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters)
+kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters, hstack=hstack)
 
 #%%
 
@@ -357,24 +468,25 @@ examine_metrics(v_metrics)
 
 # Plot the clusters for one of the kmeans models tested in the cluster_data function
 # The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
-# K must be between _min_clusters and _max_clusters defined a the top of the script 
+# ** K must be between _min_clusters and _max_clusters defined a the top of the script **
 plot_km_model(kms, matrix, K=16)
 
 #%%
 
-# Get the top terms for each cluster (can be printed below if you'd like)
+# Get the top terms for each cluster
 # num_clusters is set to 16 since it performed best for our dataset, but you can choose any value between _min_clusters and _max_clusters
-top_terms = check_cluster_features(centroids, labels, features, num_clusters=16, num_features=10)
+check_cluster_features(centroids, labels, features, num_clusters=16, num_features=num_top_terms)
 
 #%%
 
 # Test data with different numbers of tfidf features
 # num_clusters is set to 16 since it performed best for our dataset, but you can choose whatever value you want
-df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True)
+df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True, hstack=hstack)
 
 #%%
 
 # Plot how the metrics change with different numbers of tfidf features
 plot_diff_features(df_features, feature_num_clusters)
 
-
+print('------------------------------------------------------------')
+print(f'Clustering and evaluation finished. Results can be found in {directory}\n')
