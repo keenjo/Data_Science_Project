@@ -11,6 +11,7 @@ import wptools
 from pprint import pprint
 from SPARQLWrapper import SPARQLWrapper, JSON
 from tqdm import tqdm
+import os
 
 # Defintion of all parameters needed to run scraping functions
 
@@ -47,6 +48,25 @@ multi_categories = [
     "Monuments and memorials",
     "Universities and colleges"
 ]
+
+def make_directory(folder_name):
+    '''
+    Function to create a directory for the data
+    Parameters
+    ----------
+    folder_name: name of a folder as a string (defined at the beginning of the script)
+    Returns
+    -------
+    directory: a directory where graphs will be stored
+    '''
+    
+    try:
+        directory = folder_name
+        os.mkdir(directory)
+    except FileExistsError:
+        pass
+    
+    return directory
 
 # All categories
 categories = sorted(list(general_categories.keys()) + list(occupation_categories.keys()) + multi_categories)
@@ -429,6 +449,8 @@ def combine_data(categories, titles, infoboxes, content, descriptions, triples):
 
 #%%
 # Testing
+
+make_directory('data/')
 
 nlp = spacy.load('en_core_web_sm')
 articles, wd_items = get_articles(categories, num_results=_num_results)
