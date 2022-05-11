@@ -29,24 +29,12 @@ features_dict = {
 
 #%%
 # Definition of all parameters needed for functions below
-'''
-There is one parameter that must be defined at the bottom of the script for the following functions:
-    - plot_km_model
-    - check_cluster_features
-    - test_num_features
-    
-These three functions only look at one number of clusters at a time and the idea of this script is
-that you will be able to find the ideal number of clusters for your data via the first few clustering
-functions. Then these three functions mentioned above will allow you to see the scatterplot
-for your ideal number of clusters and test the idea number of tfidf features to go along with
-your ideal number of clusters.
-'''
 
-# Lables to evaluate the clustering
+# ---------- TESTING ----------
+# These parameters below are needed for testing many numbers of clusters and features
+
+#Lables to evaluate the clustering
 labels = list(df["category number"])
-
-# Number of tfidf features that you want to use when testing clustering
-_max_features = 32
 
 # Features that you would like to use in the tfidf vectorizer
 # Can choose from any of the keys in 'features_dict' above
@@ -54,6 +42,7 @@ corpus = 'triples'
 
 # If you want to use multiple features in tfidf you can enter them into a list below
 # Ex: ['triples', 'lemmas', 'description']
+# This will override anything you have defined in the 'corpus' variable
 stacked_corpus = None
 
 if stacked_corpus != None:
@@ -62,6 +51,7 @@ else:
     hstack = False
 
 # Minimum number of clusters that you would like to test in the cluster data function
+# You can set _min_clusters and _max_clusters_ to the same value if you only want to test one number of clusters
 _min_clusters = 2
 
 # Maximum number of clusters that you would like to test in the cluster data function
@@ -74,12 +64,25 @@ num_features = [10, 30, 50, 70, 90, 100, 150, 200, 500]
 num_top_terms = 10
 
 # Naming folder where graphs will be saved (include slash)
-# May want to change the firectory name if running the script multiple times
+# May want to change the directory name if running the script multiple times
 # so older data does not get overwritten
 if hstack == False:
     folder_name = f'clustering_results_{corpus}/'
 else:
-    folder_name = f'clustering_results_{str(stacked_corpus)}/'
+    stacked_corpus_name = '_'.join(stacked_corpus)
+    folder_name = f'clustering_results_{stacked_corpus_name}/'
+
+
+# ---------- FOR VIZUALIZING BEST RESULTS ----------
+# These parameters below should be adjusted after this script has been run at least once
+# so you can vizualize your clustering to find the best performing number of clusters and features
+# Adjusting these two varibales is crucial for getting the best clustering scatterplot
+
+# Number of tfidf features that you want to use when testing clustering
+_max_features = 32
+
+# Ideal number of clusters/best number of clusters according to testing
+best_clusters = 16
 
 #%%
 def make_directory(folder_name):
@@ -469,19 +472,19 @@ examine_metrics(v_metrics)
 # Plot the clusters for one of the kmeans models tested in the cluster_data function
 # The last parameter 'K' indicates the number of clusters for which you'd like to see the plot
 # ** K must be between _min_clusters and _max_clusters defined a the top of the script **
-plot_km_model(kms, matrix, K=16)
+plot_km_model(kms, matrix, K=best_clusters)
 
 #%%
 
 # Get the top terms for each cluster
 # num_clusters is set to 16 since it performed best for our dataset, but you can choose any value between _min_clusters and _max_clusters
-check_cluster_features(centroids, labels, features, num_clusters=16, num_features=num_top_terms)
+check_cluster_features(centroids, labels, features, num_clusters=best_clusters, num_features=num_top_terms)
 
 #%%
 
 # Test data with different numbers of tfidf features
 # num_clusters is set to 16 since it performed best for our dataset, but you can choose whatever value you want
-df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=True, hstack=hstack)
+df_features, feature_num_clusters = test_num_features(corpus, labels, num_features, num_clusters=best_clusters, use_idf=True, hstack=hstack)
 
 #%%
 
