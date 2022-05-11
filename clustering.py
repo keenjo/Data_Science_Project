@@ -126,10 +126,12 @@ def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=
     The function to cluster the feature
     Args:
         corpus: A list of documents to cluster
-        labels: A list of labels
+        labels: A list of labels for every document
         max_features: Maximum number of features
         max_clusters: Maximum number of clusters
         use_idf: True by default if use IDF, False otherwise.
+        hstack: False by default, tells the function whether or not it needs to stack multiple tfidf matricies
+        - will automatically change to true if the stack_corpus variable is defined
 
     Returns:
     kms: KMeans model for each number of cluster
@@ -207,6 +209,7 @@ def plot_km_model(kms, matrix, directory=directory, K=16):
     Args:
         kms: KMeans model
         K: number of clusters
+        directory: directory where graph will be stored
         matrix: input matrix
 
     Returns:
@@ -249,6 +252,8 @@ def examine_metrics(v_metrics, min_clusters=_min_clusters, directory=directory):
         Adjusted Rand indices
     Args:
         v_metrics: the metrics obtained
+        min_clusters: minmum number of clusters that were tested
+        directory: directory where graph will be stored
 
     Returns:
         Nothing
@@ -300,9 +305,16 @@ def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=Tru
     Function to iterate through multiple numbers of tfidf features
     to see how many features gives us the best result for the kmeans evaluation
     
-    max_clusters: number of clusters to use
+    corpus: A list of documents to cluster
+    labels: A list of labels for every document
+    num_features: number of features
+    num_clusters: number of clusters
+    use_idf: True by default if use IDF, False otherwise.
+    hstack: False by default, tells the function whether or not it needs to stack multiple tfidf matricies
+        - will automatically change to true if the stack_corpus variable is defined
     - default is 16, but user is encouraged to enter the value that gets the best result
       from the 'cluster_data' function
+      
     '''
         
     total_results = {}
@@ -365,6 +377,10 @@ def plot_diff_features(data, num_clusters ,directory=directory):
     
     '''
     Function to plot the effect of the number of tfidf features on the clustering evaluation
+    
+    data: dataframe containing evaluation metric scores
+    num_clusters: number of clussters to use
+    directory: directory where graph will be stored
     '''
     
     # Declare the figure
@@ -384,6 +400,11 @@ def plot_diff_features(data, num_clusters ,directory=directory):
 def examine_inertia(_v_metrics, min_clusters=_min_clusters, num_features=_max_features, directory=directory):
     '''
     Function to print out the inertia values for different numbers of clusters
+    
+    _v_metrics: dataframe containing values for evaluation metrics
+    min_clusters: minimum number of clusters used
+    num_features: number of features used fo obtain _v_metrics values
+    directory: directory where graph will be stored
     '''
     
     # Declare the figure
@@ -409,6 +430,9 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
     '''
     Function to print out the top features for each cluster
     
+    centroids: centroids of every cluster
+    labels: labels of every document
+    features: list of features for every cluster
     num_clusters = number of clusters for which you would like to see the top terms
     num_features = the number of features you would like to see per cluster
     '''
