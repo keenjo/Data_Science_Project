@@ -456,4 +456,4 @@ for column in ['Category', 'Title', 'Infobox', 'Content', 'Description', 'Triple
     print('> Column [' + column + ']:')
     pprint(df[column][index])
 
-df.to_json('scraped_data.json')
+df.to_json('data/scraped_data.json')
