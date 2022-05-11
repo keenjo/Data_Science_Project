@@ -445,11 +445,6 @@ def check_cluster_features(centroids, labels, features, num_clusters=2, num_feat
                 
 #%%
 
-# Make directory to store graphs
-make_directory(folder_name)
-
-#%%
-
 # Cluster the data
 kms, matrix, v_metrics, centroids, features = cluster_data(corpus, labels, max_features=_max_features, min_clusters=_min_clusters, max_clusters=_max_clusters, hstack=hstack)
 
