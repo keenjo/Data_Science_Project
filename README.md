@@ -9,4 +9,6 @@ Data Science Project for M1 TAL at Université de Lorraine
   - `scraped_data.json` is a json structured file containing the scraped data before preprocessing
   - `preprocessed_data.json` is a json structured file containing the scraped data after preprocessing
 - `clustering.py` contains functions for clustering
+- `cluster_results` contains results from a few different tests on our clustering script
+  - The last part of the name of each subfolder in this folder indicates the feature/features used for clustering
 - `classification.py` contains functions for classification
