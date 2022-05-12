@@ -20,7 +20,7 @@ Data Science Project for M1 TAL at Université de Lorraine
 
 ### Finding the outputs
 - Outputs from the `scraping_functions.py` and `preprocessing.py` scripts can be found in the `data` folder that will be created when you run those scripts.
-- Each output from the `clustering.py` script can be found in its own folder named via the following format `clustering_results_[feature used for clustering]`.
+- Each output from the `clustering.py` script can be found in its own folder named via the following format `cluster_results/clustering_results_[feature used for clustering]`.
 
 ### Bonus Points
 - We believe that we would be eligible to receive bonus points for a few different tests and features that we have provided which were not required:
