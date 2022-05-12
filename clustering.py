@@ -67,7 +67,7 @@ _max_clusters = 32
 # List containing the different number of tfidf features you'd like to test
 num_features = [10, 30, 50, 70, 90, 100, 150, 200, 500]
 
-# Number of top terms you would like to see per cluster
+# Number of top terms you would like to see per cluster (must be <= _max_features)
 num_top_terms = 10
 
 # Naming folder where graphs will be saved (include slash)
@@ -118,7 +118,8 @@ def make_directory(folder_name):
     
     return directory
 
-directory = make_directory(folder_name)
+make_directory('cluster_results/')
+directory = make_directory(f'cluster_results/{folder_name}')
     
 # %%
 def cluster_data(corpus, labels, max_features=500, min_clusters=2, max_clusters=16, use_idf=True, hstack=False):
