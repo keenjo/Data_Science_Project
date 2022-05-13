@@ -1,0 +1,34 @@
+Top terms for 16 clusters
+
+Cluster 1: ['ft', 'transport', 'trains', 'crew', 'election', 'energy', 'vehicles', 'engine', 'flight', 'campus']
+
+Cluster 2: ['action', 'race', 'issues', 'college', 'systems', 'information', 'image', 'crew', 'hours', 'runway']
+
+Cluster 3: ['action', 'vowel', 'leader', 'languages', 'language', 'km', 'issues', 'isbn', 'image', 'words']
+
+Cluster 4: ['faculty', 'campus', 'dialects', 'airport', 'election', 'flights', 'runway', 'vowels', 'vowel', 'locomotives']
+
+Cluster 5: ['vowel', 'vowels', 'languages', 'locomotives', 'dialects', 'trains', 'powers', 'railway', 'battle', 'army']
+
+Cluster 6: ['status', 'father', 'faculty', 'person', 'events', 'episode', 'website', 'policy', 'party', 'wife']
+
+Cluster 7: ['faculty', 'stories', 'language', 'languages', 'education', 'dialects', 'daughter', 'locomotives', 'race', 'programs']
+
+Cluster 8: ['vowels', 'runway', 'locomotives', 'rail', 'vowel', 'railway', 'terminal', 'ft', 'flights', 'schools']
+
+Cluster 9: ['action', 'operations', 'office', 'mother', 'months', 'minutes', 'trains', 'member', 'media', 'man']
+
+Cluster 10: ['faculty', 'stories', 'forces', 'election', 'trains', 'vowel', 'vowels', 'dialects', 'x', 'powers']
+
+Cluster 11: ['transport', 'engine', 'railway', 'runway', 'rail', 'flights', 'vowel', 'vowels', 'trains', 'passengers']
+
+Cluster 12: ['vowel', 'locomotives', 'vowels', 'terminal', 'dialects', 'runway', 'x', 'stories', 'trains', 'artist']
+
+Cluster 13: ['action', 'people', 'passengers', 'passenger', 'party', 'operations', 'oil', 'office', 'mother', 'months']
+
+Cluster 14: ['locomotives', 'dialects', 'vowel', 'vowels', 'race', 'runway', 'percent', 'flight', 'election', 'crew']
+
+Cluster 15: ['transport', 'passengers', 'operations', 'population', 'vowel', 'transportation', 'terminal', 'trains', 'flights', 'rail']
+
+Cluster 16: ['locomotives', 'pilot', 'cities', 'vehicles', 'government', 'runway', 'vowel', 'gas', 'railway', 'rail']
+

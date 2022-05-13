@@ -1,0 +1,34 @@
+Top terms for 16 clusters
+
+Cluster 1: ['rizal', 'italian', 'guevara', '2019', 'french', 'france', '3', '4', 'america', 'russia']
+
+Cluster 2: ['joker', 'batman', 'rome', 'nasa', 'guevara', 'doom', 'bush', 'obama', 'mao', 'reagan']
+
+Cluster 3: ['congress', 'batman', 'bush', 'scrooge', 'doom', 'superman', 'guevara', 'joker', 'u.s.', 'kennedy']
+
+Cluster 4: ['scrooge', 'johnson', 'joker', 'doom', 'kennedy', 'bush', 'batman', 'aquino', 'america', 'lincoln']
+
+Cluster 5: ['mickey', 'mao', 'aquino', 'batman', 'bush', 'magneto', 'doom', 'european', 'lois', 'kennedy']
+
+Cluster 6: ['batman', 'bush', 'mickey', 'aquino', 'america', 'doom', 'scrooge', 'washington', 'ford', 'reagan']
+
+Cluster 7: ['kennedy', 'bush', 'america', 'joker', 'congress', 'doom', 'earth', 'reagan', 'rizal', 'scrooge']
+
+Cluster 8: ['rome', 'kennedy', 'joker', 'johnson', 'guevara', 'mao', 'marcos', 'scrooge', 'rizal', 'california']
+
+Cluster 9: ['rizal', 'superman', 'scrooge', 'bush', 'earth', 'joker', 'doom', 'kennedy', 'aquino', 'lincoln']
+
+Cluster 10: ['paris', 'aquino', 'obama', 'bush', 'california', 'congress', 'doom', 'nixon', 'nasa', 'europe']
+
+Cluster 11: ['five', 'moscow', 'mickey', 'marcos', 'mao', 'magneto', 'london', 'lois', 'lincoln', 'kennedy']
+
+Cluster 12: ['magneto', 'mao', 'marcos', 'mickey', 'rizal', 'lois', 'scrooge', 'aquino', 'guevara', 'joker']
+
+Cluster 13: ['reagan', 'joker', 'guevara', 'superman', 'russia', 'soviet', 'aquino', 'lincoln', 'batman', 'california']
+
+Cluster 14: ['aquino', 'doom', 'rizal', 'ford', 'reagan', 'obama', 'mao', 'superman', 'nixon', 'guevara']
+
+Cluster 15: ['kennedy', 'bush', 'rizal', 'congress', 'europe', 'ford', 'guevara', 'johnson', 'aquino', 'lincoln']
+
+Cluster 16: ['rizal', 'joker', 'guevara', 'reagan', 'bush', 'batman', 'aquino', 'lincoln', 'nixon', 'mao']
+
