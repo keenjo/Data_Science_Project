@@ -1,0 +1,34 @@
+Top terms for 16 clusters
+
+Cluster 1: ['stated', 'fight', 'issued', 'claimed', 'ordered', 'set', 'living', 'performed', 'selected', 'saying']
+
+Cluster 2: ['powered', 'operating', 'consists', 'operated', 'spoken', 'voiced', 'serves', 'animated', 'operate', 'takes']
+
+Cluster 3: ['signed', 'visited', 'caused', 'changed', 'conducted', 'declared', 'taking', 'kill', 'married', 'elected']
+
+Cluster 4: ['fight', 'voiced', 'flew', 'spoken', 'portrayed', 'kill', 'assigned', 'leave', 'animated', 'married']
+
+Cluster 5: ['issued', 'paid', 'operating', 'operated', 'operate', 'moved', 'met', 'marked', 'launched', 'killing']
+
+Cluster 6: ['powered', 'reading', 'carried', 'published', 'presented', 'compared', 'portrayed', 'conducted', 'ordered', 'operate']
+
+Cluster 7: ['wrote', 'involved', 'introduced', 'increasing', 'increased', 'spoken', 'supported', 'helped', 'help', 'join']
+
+Cluster 8: ['ranked', 'graduated', 'failed', 'defeated', 'killing', 'elected', 'fight', 'operated', 'appointed', 'operate']
+
+Cluster 9: ['defeated', 'portrayed', 'spoken', 'voiced', 'kill', 'married', 'animated', 'join', 'attended', 'marked']
+
+Cluster 10: ['wrote', 'operating', 'ordered', 'portrayed', 'create', 'caused', 'reading', 'referred', 'buried', 'destroyed']
+
+Cluster 11: ['according', 'paid', 'passed', 'placed', 'planned', 'played', 'portrayed', 'powered', 'produced', 'ordered']
+
+Cluster 12: ['fight', 'claimed', 'incorporated', 'animated', 'consists', 'offers', 'form', 'defeated', 'uses', 'appears']
+
+Cluster 13: ['helped', 'launched', 'written', 'killing', 'kill', 'joined', 'increased', 'stop', 'supported', 'included']
+
+Cluster 14: ['join', 'defeated', 'elected', 'failed', 'captured', 'fight', 'flew', 'graduated', 'granted', 'sold']
+
+Cluster 15: ['fight', 'voiced', 'kill', 'flying', 'leave', 'flew', 'appear', 'saying', 'spoken', 'killing']
+
+Cluster 16: ['flew', 'issued', 'conducted', 'consists', 'founded', 'selected', 'appointed', 'supported', 'constructed', 'completed']
+
