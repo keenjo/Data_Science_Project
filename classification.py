@@ -1,10 +1,12 @@
 print('Importing libraries...')
 
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
 import re
+import os
 import warnings
 
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
@@ -43,66 +45,145 @@ selected_features = [
 
 # Parameters for each of the meta-features.
 # We ended up using `use_idf=False` everywhere since it surprisingly gave the best results.
+# We initially started with a value 10 times lower for max_features`. However, experimenting
+# gave us best results for larger numbers, so we kept them despite the extended training time.
 feature_options = {
     # Column name            use_idf  max_features
-    'processed text':        (False,   500),
-    'processed description': (False,   400),
-    'nouns':                 (False,   100),
-    'verbs':                 (False,   100),
-    'NER tokens':            (False,   50),
-    'processed triples':     (False,   400),
+    'processed text':        (False,   5000),
+    'processed description': (False,   4000),
+    'nouns':                 (False,   1000),
+    'verbs':                 (False,   1000),
+    'NER tokens':            (False,   500),
+    'processed triples':     (False,   4000),
 }
 
-# List of classifiers and parameter spaces to try.
-# Please note that the initial search space was larger, but that we have reduced it
-# so that the training wouldn't last too long.
 print('Loading parameter grid...')
+
+# Initial search space. We have successfully ran GridSearchCV over these parameters,
+# however the script took over half a day to run. We leave them here for reference.
+# We have therefore subsequently decided to run GridSearchCV on a smaller subset (below).
+
+# classifiers = [
+    # (Perceptron(random_state=RANDOM_STATE), {
+        # 'alpha': np.logspace(-5, 1, 20),
+        # 'max_iter': [5, 10, 20, 50, 100]
+    # }),
+    # (KNeighborsClassifier(), {
+        # 'n_neighbors': [3, 5, 8, 12, 20],
+        # 'weights': ['uniform', 'distance'],
+        # 'metric': ['euclidean', 'manhattan']
+    # }),
+    # (SVC(random_state=RANDOM_STATE), {
+        # 'C': np.logspace(-2, 2, 10),
+        # 'gamma': np.logspace(-3, 3, 10),
+        # 'kernel': ['rbf', 'poly', 'sigmoid']
+    # }),
+    # (DecisionTreeClassifier(random_state=RANDOM_STATE), {
+        # 'criterion': ['gini', 'entropy'],
+        # 'max_depth': range(1, 10),
+        # 'min_samples_split': range(2, 10),
+        # 'min_samples_leaf': range(1, 5)
+    # }),
+    # (RandomForestClassifier(random_state=RANDOM_STATE), {
+        # 'criterion' :['gini', 'entropy'],
+        # 'n_estimators': list(map(int, np.logspace(1, 3, 7))),
+        # 'max_features': ['sqrt', 'log2'],
+        # 'max_depth': range(2, 10)
+    # }),
+    # (MLPClassifier(random_state=RANDOM_STATE), {
+        # 'solver': ['lbfgs'],
+        # 'max_iter': list(map(int, np.logspace(2, 3.5, 4))),
+        # 'alpha': np.logspace(-10, -1, 30),
+        # 'hidden_layer_sizes': list(map(int, 2**np.linspace(1, 8, 8)))
+    # }),
+    # (AdaBoostClassifier(random_state=RANDOM_STATE, base_estimator = DecisionTreeClassifier(random_state=RANDOM_STATE, max_features="auto", class_weight="balanced")), {
+        # 'base_estimator__max_depth': range(2, 10),
+        # 'base_estimator__min_samples_leaf': [5, 10],
+        # 'n_estimators': list(map(int, np.logspace(1, 3, 7))),
+        # 'learning_rate': np.logspace(-5, -1, 20)
+    # }),
+    # (GaussianNB(), {
+        # 'var_smoothing': np.logspace(-10, -1, 30)
+    # }),
+    # (QuadraticDiscriminantAnalysis(), {
+        # 'reg_param': np.linspace(0.1, 0.5, 5)
+    # }),
+# ]
+
+
+# List of classifiers and parameter spaces to try.
 classifiers = [
     (Perceptron(random_state=RANDOM_STATE), {
-        'alpha': np.logspace(-5, 1, 20),
-        'max_iter': [5, 10, 20, 50, 100]
+        'alpha': np.logspace(-5, -4, 5),
+        'max_iter': [5, 10]
     }),
     (KNeighborsClassifier(), {
-        'n_neighbors': [3, 5, 8, 12, 20],
+        'n_neighbors': [3, 5, 8],
         'weights': ['uniform', 'distance'],
         'metric': ['euclidean', 'manhattan']
     }),
     (SVC(random_state=RANDOM_STATE), {
-        'C': np.logspace(-2, 2, 10),
-        'gamma': np.logspace(-3, 3, 10),
-        'kernel': ['rbf', 'poly', 'sigmoid']
+        'C': [10],
+        'gamma': [0.1],
+        'kernel': ['sigmoid']
     }),
     (DecisionTreeClassifier(random_state=RANDOM_STATE), {
         'criterion': ['gini', 'entropy'],
-        'max_depth': range(1, 10),
-        'min_samples_split': range(2, 10),
-        'min_samples_leaf': range(1, 5)
+        'max_depth': [9],
+        'min_samples_split': [5],
+        'min_samples_leaf': range(1, 3)
     }),
     (RandomForestClassifier(random_state=RANDOM_STATE), {
         'criterion' :['gini', 'entropy'],
-        'n_estimators': list(map(int, np.logspace(1, 3, 7))),
+        'n_estimators': [100],
         'max_features': ['sqrt', 'log2'],
-        'max_depth': range(2, 10)
+        'max_depth': [9]
     }),
     (MLPClassifier(random_state=RANDOM_STATE), {
         'solver': ['lbfgs'],
-        'max_iter': list(map(int, np.logspace(2, 3.5, 4))),
-        'alpha': np.logspace(-10, -1, 30),
-        'hidden_layer_sizes': list(map(int, 2**np.linspace(1, 8, 8)))
+        'max_iter': [100],
+        'alpha': [0.02],
+        'hidden_layer_sizes': [32]
     }),
     (AdaBoostClassifier(random_state=RANDOM_STATE, base_estimator = DecisionTreeClassifier(random_state=RANDOM_STATE, max_features="auto", class_weight="balanced")), {
-        'base_estimator__max_depth': range(2, 10),
-        'base_estimator__min_samples_leaf': [5, 10],
-        'n_estimators': list(map(int, np.logspace(1, 3, 7))),
-        'learning_rate': np.logspace(-5, -1, 20)
+        'base_estimator__max_depth': [5],
+        'base_estimator__min_samples_leaf': [5],
+        'n_estimators': [1000],
+        'learning_rate': [0.045]
     }),
     (GaussianNB(), {
-        'var_smoothing': np.logspace(-10, -1, 30)
+        'var_smoothing': np.logspace(-3, -2, 4)
     }),
     (QuadraticDiscriminantAnalysis(), {
-        'reg_param': np.linspace(0.1, 0.5, 5)
+        'reg_param': np.linspace(0.2, 0.3, 3)
     }),
 ]
+
+
+def make_directory(folder_name):
+    '''
+    Function to create a directory for the files containing the results
+
+    Parameters
+    ----------
+    folder_name: name of a folder as a string (defined at the beginning of the script)
+
+    Returns
+    -------
+    directory: a directory where graphs will be stored
+
+    '''
+    
+    try:
+        directory = folder_name
+        os.mkdir(directory)
+    except FileExistsError:
+        pass
+    
+    return directory
+
+
+directory = make_directory('classif_results/')
 
 
 def idx_to_feature(idx):
@@ -162,10 +243,10 @@ Y = df['category number']
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=TEST_SPLIT_SIZE, random_state=RANDOM_STATE)
 
 best_classifiers = []
-display_strings = []
+classifier_results = []
 
 print('Optimizing hyperparameters for all models...')
-print('Warning: This operation can take a long time (~1 hour). Results will be displayed at the end.')
+print('Warning: This operation can take a few minutes. Results will be displayed at the end.')
 
 # Classifier optimization loop
 for i, (classifier, parameters) in enumerate(classifiers):
@@ -185,21 +266,33 @@ for i, (classifier, parameters) in enumerate(classifiers):
     # Store best classifier and accuracy
     best_classifiers.append((clf.best_score_, clf.best_estimator_))
     
-    display_strings.append([
-        str(classifier.__class__).ljust(35),                          # Classifier name
-        str({k: best_parameters[k] for k in parameters}).ljust(100), # All optimized parameters
-        clf.best_score_                                              # Accuracy
-    ])
+    classifier_results.append({
+        'classifier': str(classifier.__class__).split('\'')[1].split('.')[-1],
+        'best_params': {k: best_parameters[k] for k in parameters},
+        'best_accuracy': clf.best_score_
+    })
     print(f'Optimizing hyperparameters for all models ({i+1}/{len(classifiers)})...')
 
+# Store and display best parameters and accuracy for each classifier
+with open(directory + f'best_classifier_params.json', 'w') as f:
+    json.dump(classifier_results, f)
+
 print()
-print('Classifier'.ljust(35), 'Best parameters'.ljust(100), 'Best accuracy')
-print('-'*145)
+print('Classifier'.ljust(35), 'Best parameters'.ljust(120), 'Best accuracy')
+print('-'*170)
 
-for s1, s2, s3 in display_strings:
-    print(s1, s2, s3)
+for dic in classifier_results:
+    print(dic['classifier'].ljust(35), str(dic['best_params']).ljust(120), dic['best_accuracy'])
 
-# Sort classifiers by accuracy and pick the best one
+# Also display best accuracy for each classifier in a bar chart
+df = pd.DataFrame(classifier_results)
+plot = df.plot.bar(title='Best accuracy for each trained classifier')
+plot.set_xlabel('Classifier')
+plot.set_ylabel('Accuracy')
+plot.set_xticklabels(df['classifier'], rotation=90)
+plot.get_figure().savefig(directory + 'classifier_comparison.png', bbox_inches='tight')
+
+# Sort classifiers by accuracy and pick the best one, then use it to predict categories
 best_accuracy, best_classifier = sorted(best_classifiers, reverse=True)[0]
 
 Y_pred = best_classifier.predict(X_test.toarray())
@@ -221,24 +314,36 @@ for pred in Y_test:
 print()
 
 # Confusion matrix (opens in a graphical window)
-ConfusionMatrixDisplay.from_predictions(Y_test, Y_pred)
 
-print(classification_report(Y_test, Y_pred))
+classifier_name = str(best_classifier.__class__).split('\'')[1]
+disp = ConfusionMatrixDisplay.from_predictions(Y_test, Y_pred, display_labels=[idx_to_category[x] for x in range(16)], xticks_rotation='vertical')
+disp.figure_.savefig(directory + f'confusion_matrix_{classifier_name}.png', bbox_inches='tight')
+
+# Classification report (precision, recall and F1-score)
+report = classification_report(Y_test, Y_pred)
+print(report)
+with open(directory + f'classif_report_{classifier_name}.txt', 'w') as f:
+    f.write(report)
 
 plt.show()
 
-# To display the top features for each class, we first need to map each feature index back to its corresponding feature name
-idx_to_tag = dict()
+# The following part only applies to the Perceptron.
+# Since it is no longer our best model, it has been commented out.
+#
+# # To display the top features for each class, we first need to map each feature index back to its corresponding feature name
+# idx_to_tag = dict()
 
-for i, vectorizer in enumerate(vectorizers):
-    # For each meta-feature, add the corresponding offset to the index
-    for k, v in vectorizer.vocabulary_.items():
-        idx_to_tag[feature_idx_offset[selected_features[i]] + v] = k
+# for i, vectorizer in enumerate(vectorizers):
+    # # For each meta-feature, add the corresponding offset to the index
+    # for k, v in vectorizer.vocabulary_.items():
+        # idx_to_tag[feature_idx_offset[selected_features[i]] + v] = k
 
 # # Display top features
 # print('Category'.ljust(30), 'Meta-feature'.ljust(30), 'Feature'.ljust(20), 'Weight'.ljust(20))
 # print('-'*100)
-# for class_num, class_weights in enumerate(perceptron.coef_):
+# print(best_classifier.feature_importances_)
+# print(len(best_classifier.feature_importances_))
+# for class_num, class_weights in enumerate(best_classifier.feature_importances_):
     # # Compute and display the top features and weights for the class
     # top_vals = sorted(enumerate(class_weights), reverse=True, key=lambda x: x[1])
     # for id, val in top_vals[:10]:
