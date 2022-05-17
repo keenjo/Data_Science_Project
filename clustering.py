@@ -50,7 +50,7 @@ corpus = 'triples'
 # If you want to use multiple features in tfidf you can enter them into a list below
 # Ex: ['triples', 'lemmas', 'description']
 # This will override anything you have defined in the 'corpus' variable
-stacked_corpus = None
+stacked_corpus = ['triples', 'lemmas', 'description']
 
 if stacked_corpus != None:
     hstack = True
@@ -89,7 +89,7 @@ Adjusting these two varibales is crucial for getting the best scatterplot of you
 '''
 
 # Number of tfidf features that you want to use when testing clustering
-_max_features = 32
+_max_features = 200
 
 # Best number of clusters according to testing
 # Must be between _min_clusters and _max_clusters
@@ -224,14 +224,21 @@ def plot_km_model(kms, matrix, directory=directory, K=16):
                             'Xtsne': tsne_obj[:, 0],
                             'Ytsne': tsne_obj[:, 1]
                             })
+    
+    colors = ['#000000', '#a0522d', '#006400', '#778899', '#000080', '#ff0000',
+          '#ffa500', '#ffff00', '#c71585', '#00ff00', '#00ffff', '#0000ff',
+          '#ff00ff', '#1e90ff', '#98fb98', '#ffdead']
+    custom_palette = sns.color_palette(colors, 16)
+    
     # Declare the figure
     plt.figure(figsize=[12, 8])
     # Construct the scatter plot
     sns.scatterplot(x='Xtsne', y='Ytsne',
                     hue='Cluster',
-                    palette='colorblind',
+                    palette = custom_palette,
                     legend='full',
                     data=tsne_df)
+    
     # Set the plot title and show
     plt.title("Clustering plot for {0} clusters and {1} features".format(K, _max_features))
     
@@ -332,6 +339,9 @@ def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=Tru
         if hstack == False:
             # Instantiate a vectoriser
             tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+            # Oddly, we had some issues when we did not define the tokenizer even though the default of TFidfVectorizer does not include a tokenizer,
+            # this is why we have a 'dummy' tokenier function as a parameter that just takes a value and returns the it without doing anything
+            
             # Fit the vectoriser to the data
             matrix = tfidf.fit_transform(corpus)
     
@@ -340,7 +350,7 @@ def test_num_features(corpus, labels, num_features, num_clusters=16, use_idf=Tru
         
             for feature in corpus:
         
-                tfidf = TfidfVectorizer(max_features=num, use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
+                tfidf = TfidfVectorizer(max_features=round(num/len(corpus)), use_idf=use_idf, lowercase=False, tokenizer=lambda x: x)
                 part_matrix = tfidf.fit_transform(feature)
                 tfidf_stack.append(part_matrix)
             
@@ -502,6 +512,8 @@ df_features, feature_num_clusters = test_num_features(corpus, labels, num_featur
 
 # Plot how the metrics change with different numbers of tfidf features
 plot_diff_features(df_features, feature_num_clusters)
+
+print(v_metrics[16])
 
 print('------------------------------------------------------------')
 print(f'Clustering and evaluation finished. Results can be found in {directory}\n')
